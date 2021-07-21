@@ -1,0 +1,88 @@
+[user]
+  name = Peter Polacik
+  email = peter.polacik@beyondidentity.com
+
+[color]
+  ui = true
+
+[core]
+  pager = less -x4
+  editor = vim
+  whitespace = trailing-space,space-before-tab,tab-in-indent
+
+[merge]
+  summary = true
+  tool = vimdiff
+
+[push]
+  default = current
+
+[pull]
+  default = current
+  rebase = true
+
+[rerere]
+  enabled = true
+
+[diff]
+  memonicprefix = true
+  algorithm = patience
+
+[branche]
+  autosetuprebase = always
+
+[apply]
+  whitespace = nowarn
+
+[alias]
+  ls = log --prety=format:"%C(yellow)%h%Cref%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+  ll = log --prety=format:"%C(yellow)%h%Cref%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+  lnc = log --pretty=format:"%h\\ %s \\ [%cn]"
+  lds = log --prety=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+  ld = log --prety=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+  le = log --oneline --decorate
+
+  filelog = log -u
+  fl = log -u
+
+  dl = "!git ll -1"
+  dc = diff --cached HEAD^
+
+  dr = "!f() { git diff "$1"^.."$1"; }; f"
+  diffr = "!f() { git diff "$1"^.."$1"; }; f"
+  lc = "!f() { git ll "$1"^.."$1"; }; f"
+
+  f = "!git ls-files | grep -i"
+  grep = grep -Ii
+  gr = grep -Ii
+
+  la = "!git config -l | grep alias | cut -c 7-"
+
+  lasttag = describe --tags --abbrev=0
+  lt = describe --tags --abbrev=0
+
+  cp = cherry-pick
+  st = status -s
+  cl = clone
+  ci = commit
+  cm = commit -m
+  cma = commit -a -m
+  ca = commit --amend
+  amend = commit --amend
+  caa = commit -a --amend -C HEAD
+  co = checkout
+  br = branch
+  diff = diff --word-diff
+  dc = diff --cached
+  r = reset
+  r1 = reset HEAD^
+  r2 = reset HEAD^^
+  rh = reset --hard
+  rh1 = reset HEAD^ --hard
+  rh2 = reset HEAD^^ --hard
+  ai = add --interactive
+
+  sl = stash list
+  sa = stash apply
+  ss = stash save
+  snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
