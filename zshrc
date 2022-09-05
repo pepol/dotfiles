@@ -91,6 +91,7 @@ export LANG=en_US.UTF-8
 #   export EDITOR='mvim'
 # fi
 export EDITOR="vim"
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"

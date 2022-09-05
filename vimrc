@@ -35,6 +35,7 @@ if has("autocmd")
   au BufRead,BufNewFile *.go set filetype=go
   autocmd FileType python set sw=4 sts=4 ts=4 et
   autocmd FileType go set sw=8 sts=8 ts=8 noet
+  autocmd FileType yaml set sw=2 sts=2 ts=2 et
 else
   set autoindent
 endif

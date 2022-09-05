@@ -1,6 +1,16 @@
 [user]
   name = Peter Polacik
   email = peter.polacik@beyondidentity.com
+  signingkey = 996A7745F5B8BB46D535A4E3A899DC24839595BA
+
+[gpg]
+  program = /Applications/Beyond Identity.app/Contents/MacOS/gpg-bi
+
+[commit]
+  gpgsign = true
+
+[credential]
+	helper = store
 
 [color]
   ui = true
@@ -35,11 +45,11 @@
   whitespace = nowarn
 
 [alias]
-  ls = log --prety=format:"%C(yellow)%h%Cref%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
-  ll = log --prety=format:"%C(yellow)%h%Cref%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
   lnc = log --pretty=format:"%h\\ %s \\ [%cn]"
-  lds = log --prety=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
-  ld = log --prety=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+  lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+  ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
   le = log --oneline --decorate
 
   filelog = log -u
