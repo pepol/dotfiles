@@ -1,16 +1,6 @@
 [user]
   name = Peter Polacik
-  email = peter.polacik@beyondidentity.com
-  signingkey = 996A7745F5B8BB46D535A4E3A899DC24839595BA
-
-[gpg]
-  program = /Applications/Beyond Identity.app/Contents/MacOS/gpg-bi
-
-[commit]
-  gpgsign = true
-
-[credential]
-	helper = store
+  email = peter@polacik.org
 
 [color]
   ui = true
