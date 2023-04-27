@@ -1,6 +1,6 @@
 [user]
   name = Peter Polacik
-  email = peter@polacik.org
+  email = peter.polacik@sentinelone.com
 
 [color]
   ui = true
@@ -9,6 +9,7 @@
   pager = less -x4
   editor = vim
   whitespace = trailing-space,space-before-tab,tab-in-indent
+  hooksPath = /Users/peter.polacik/.git/hooks
 
 [merge]
   summary = true
