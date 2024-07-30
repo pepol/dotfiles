@@ -87,3 +87,12 @@
   sa = stash apply
   ss = stash save
   snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+[credential]
+	helper = osxkeychain
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[url "ssh://git@ghe.eng.sentinelone.tech/"]
+	insteadOf = https://ghe.eng.sentinelone.tech/

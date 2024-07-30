@@ -20,6 +20,8 @@ set colorcolumn=80
 
 set updatetime=100
 
+execute pathogen#infect()
+
 " }}}
 
 " Section: Autocmd {{{
@@ -33,12 +35,19 @@ if has("autocmd")
     \ endif
   augroup END
   au BufRead,BufNewFile *.go set filetype=go
+  au BufRead,BufNewFile *.tf set filetype=terraform
+  au BufRead,BufNewFile *.hcl set filetype=terraform
   autocmd FileType python set sw=4 sts=4 ts=4 et
   autocmd FileType go set sw=8 sts=8 ts=8 noet
   autocmd FileType yaml set sw=2 sts=2 ts=2 et
+  autocmd FileType yaml setlocal indentkeys-=0#
 else
   set autoindent
 endif
+
+let g:cue_fmt_on_save=0
+let g:slime_target = "tmux"
+let g:slime_no_mappings = 1
 
 " }}}
 
@@ -70,6 +79,8 @@ nmap <leader>l :bnext<CR>
 nmap <leader>h :bprevious<CR>
 nmap <leader>bq :bp <BAR> bd #<CR>
 nmap <leader>bl :ls<CR>
+nmap <leader>s <Plug>SlimeMotionSend
+nmap <leader>ss <Plug>SlimeLineSend
 
 " Insert Mode
 inoremap jj <esc>
@@ -79,6 +90,7 @@ inoremap <Left> <nop>
 inoremap <Right> <nop>
 
 " Visual Mode
+xmap <leader>s <Plug>SlimeRegionSend
 
 " }}}
 " vim:foldmethod=marker:foldlevel=0

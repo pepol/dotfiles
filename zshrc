@@ -1,8 +1,6 @@
 zstyle :omz:plugins:ssh-agent agent-forwarding on
+zstyle :omz:alpha:lib:git async-prompt no
 #zstyle :omz:plugins:ssh-agent identities dev-key rolling-key staging-key git-key
-
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/peter.polacik/.oh-my-zsh"
@@ -91,7 +89,7 @@ export LANG=en_US.UTF-8
 #   export EDITOR='mvim'
 # fi
 export EDITOR="vim"
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$HOME/.local/bin:$PATH"
+export PATH="$HOME/.qlot/bin:$HOME/.emacs.d/bin:/opt/homebrew/opt/node@16/bin:/opt/homebrew/opt/gnu-sed/libexec/gnubin:${KREW_ROOT:-$HOME/.krew}/bin:$HOME/go/bin:$HOME/.local/bin:$PATH"
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -107,6 +105,7 @@ export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$HOME/.local/bin:$PATH"
 export GNU_GETOPT_PREFIX="$(brew --prefix gnu-getopt)"
 export AWS_VAULT_PROMPT=ykman
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+export KUBECONFIG=~/.kube/eks-config:~/.kube/config
 
 export PROMPT='$(aws_sso_prompt)$(kube_ps1) '$PROMPT
 
