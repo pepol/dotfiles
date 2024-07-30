@@ -9,7 +9,9 @@
 
 ;; Default frame configuration: full screen, good looking title bar on MacOS
 (setq frame-resize-pixelwise t)
-(tool-bar-mode -1)
+
+(cond ((display-graphic-p) (tool-bar-mode -1)))
+
 (setq default-frame-alist '((fullscreen . maximized)
           (background-color . "#000000")
           (foreground-color . "#ffffff")
