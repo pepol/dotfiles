@@ -1,2 +1,14 @@
 Host *.ropenic.net
   User pp
+
+Host rsync-zrh
+  Hostname zh3793.rsync.net
+  User zh3793
+
+Host ams01
+  Hostname ams01.eu.c.arcapola.com
+  User root
+
+Host ws01
+  Hostname ws01.cont.c.arcapola.com
+  User root
