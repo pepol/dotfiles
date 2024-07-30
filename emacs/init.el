@@ -87,7 +87,7 @@ If the new path's directories do not exist, create them."
   (mapc (lambda (hook) (add-hook hook 'hl-line-mode)) hl-line-hooks))
 
 ;; Tab bar configuration
-(setopt tab-bar-show 1)
+(setopt tab-bar-show t)
 
 ;; Add the time to tab bar, if visible
 (add-to-list 'tab-bar-format 'tab-bar-format-align-right 'append)
@@ -100,6 +100,8 @@ If the new path's directories do not exist, create them."
 (use-package emacs
   :config
   (load-theme 'modus-vivendi))
+
+(setq vc-follow-symlinks t)
 
 (require 'package)
 (setq package-archives '(("elpa" . "http://tromey.com/elpa/")
