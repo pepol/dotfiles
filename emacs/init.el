@@ -113,7 +113,7 @@ If the new path's directories do not exist, create them."
 (unless package-archive-contents
   (package-refresh-contents))
 
-(setq packages '(go-mode cue-mode magit dockerfile-mode))
+(setq packages '(go-mode cue-mode magit dockerfile-mode slime))
 
 (dolist (package packages)
   (unless (package-installed-p package)
