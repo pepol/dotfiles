@@ -27,3 +27,10 @@ ln -s $CONFDIR/zshrc ~/.zshrc
 mkdir -p ~/.ssh && chmod 700 ~/.ssh
 [[ -f ~/.ssh/config ]] && mv ~/.ssh/config ~/.backup-configs/ssh_config
 ln -s $CONFDIR/ssh_config ~/.ssh/config
+
+# Emacs
+mkdir -p ~/.emacs.d
+[[ -f ~/.emacs.d/early-init.el ]] && mv ~/.emacs.d/early-init.el ~/.backup-configs/emacs-early-init.el
+ln -s $CONFDIR/emacs/early-init.el ~/.emacs.d/early-init.el
+[[ -f ~/.emacs.d/init.el ]] && mv ~/.emacs.d/init.el ~/.backup-configs/emacs-init.el
+ln -s $CONFDIR/emacs/init.el ~/.emacs.d/init.el
