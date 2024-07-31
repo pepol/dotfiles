@@ -132,6 +132,8 @@ If the new path's directories do not exist, create them."
 
 (pp/fix-utf)
 
+(setq inferior-lisp-program (executable-find "sbcl"))
+
 (load "server")
 (unless (server-running-p)
   (server-start))
