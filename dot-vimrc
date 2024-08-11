@@ -46,6 +46,9 @@ endif
 let g:cue_fmt_on_save=0
 let g:slime_target = "tmux"
 let g:slime_no_mappings = 1
+let g:ale_completion_enabled = 1
+
+set omnifunc=ale#completion#OmniFunc
 
 " }}}
 
@@ -81,6 +84,7 @@ nmap <leader>s <Plug>SlimeMotionSend
 nmap <leader>ss <Plug>SlimeLineSend
 nmap <leader>d :NERDTreeToggle<CR>
 nmap <leader>g :Git<CR>
+nmap <leader>p :CtrlP<CR>
 
 " Insert Mode
 inoremap jj <esc>
