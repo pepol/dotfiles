@@ -20,8 +20,6 @@ set colorcolumn=80
 
 set updatetime=100
 
-execute pathogen#infect()
-
 " }}}
 
 " Section: Autocmd {{{
