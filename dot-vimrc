@@ -79,6 +79,8 @@ nmap <leader>bq :bp <BAR> bd #<CR>
 nmap <leader>bl :ls<CR>
 nmap <leader>s <Plug>SlimeMotionSend
 nmap <leader>ss <Plug>SlimeLineSend
+nmap <leader>d :NERDTreeToggle<CR>
+nmap <leader>g :Git<CR>
 
 " Insert Mode
 inoremap jj <esc>
