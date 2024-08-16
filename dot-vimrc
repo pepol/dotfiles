@@ -49,6 +49,7 @@ let g:slime_no_mappings = 1
 let g:ale_completion_enabled = 1
 
 set omnifunc=ale#completion#OmniFunc
+set number
 
 " }}}
 
@@ -85,6 +86,9 @@ nmap <leader>ss <Plug>SlimeLineSend
 nmap <leader>d :NERDTreeToggle<CR>
 nmap <leader>g :Git<CR>
 nmap <leader>p :CtrlP<CR>
+
+autocmd FileType markdown nnoremap <buffer> <leader>r :MarkdownRunner<CR>
+autocmd FileType markdown nnoremap <buffer> <leader>R :MarkdownRunnerInsert<CR>
 
 " Insert Mode
 inoremap jj <esc>
