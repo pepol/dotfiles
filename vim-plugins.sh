@@ -20,7 +20,7 @@ mkdir -p $PLUGIN_DIRECTORY
 
 install_plugin "fugitive" "https://tpope.io/vim/fugitive.git"
 install_plugin "surround" "https://tpope.io/vim/surround.git"
-install_plugin "symlink" "https://github.com/aymericbeaumet/vim-symlink.git"
+#install_plugin "symlink" "https://github.com/aymericbeaumet/vim-symlink.git"  ## Causes issues with autocmd nesting
 install_plugin "bbye" "https://github.com/moll/vim-bbye.git"
 install_plugin "nerdtree" "https://github.com/preservim/nerdtree.git"
 install_plugin "devicons" "https://github.com/ryanoasis/vim-devicons.git"
@@ -35,3 +35,5 @@ install_plugin "peekaboo" "https://github.com/junegunn/vim-peekaboo.git"
 
 install_plugin "textobj-user" "https://github.com/kana/vim-textobj-user.git"
 install_plugin "textobj-indent" "https://github.com/kana/vim-textobj-indent.git"
+
+install_plugin "vlime" "https://github.com/vlime/vlime.git"
