@@ -12,13 +12,16 @@
 ;; Save history of minibuffer
 (savehist-mode)
 
-;; Move through windows with Ctrl-<arrow-keys>
-(windmove-default-keybindings 'control)
+;; Move through windows
+(global-set-key (kbd "C-c w h") 'windmove-left)
+(global-set-key (kbd "C-c w j") 'windmove-down)
+(global-set-key (kbd "C-c w k") 'windmove-up)
+(global-set-key (kbd "C-c w l") 'windmove-right)
 
 (setopt sentence-end-double-space nil)
 
 ;; Put all backup files into ~/.emacs.d/backups
-(defun ppx--backup-file-name (fpath)
+(defun pp/backup-file-name (fpath)
   "Return a new file path of a given file path.
 If the new path's directories do not exist, create them."
   (let* ((backupRootDir (concat user-emacs-directory "backups/"))
@@ -26,7 +29,7 @@ If the new path's directories do not exist, create them."
    (backupFilePath (replace-regexp-in-string "//" "/" (concat backupRootDir filePath "~") )))
     (make-directory (file-name-directory backupFilePath) (file-name-directory backupFilePath))
     backupFilePath))
-(setopt make-backup-file-name-function 'ppx--backup-file-name)
+(setopt make-backup-file-name-function 'pp/backup-file-name)
 
 ;; Mac fixes
 (when (eq system-type 'darwin)
@@ -106,18 +109,17 @@ If the new path's directories do not exist, create them."
 (require 'package)
 (setq package-archives '(("elpa" . "http://tromey.com/elpa/")
                          ("melpa" . "https://melpa.org/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")
-                         ("nongnu" . "http://elpa.nongnu.org/packages/")))
+                         ("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
-
-(unless package-archive-contents
-  (package-refresh-contents))
 
 (setq packages '(go-mode cue-mode magit dockerfile-mode slime))
 
-(dolist (package packages)
-  (unless (package-installed-p package)
-    (package-install package)))
+(defun pp/install-packages ()
+  (interactive)
+  (package-refresh-contents)
+  (dolist (package packages)
+    (unless (package-installed-p package)
+      (package-install package))))
 
 (add-hook 'go-mode-hook 'lsp-deferred)
 
