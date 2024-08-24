@@ -18,6 +18,8 @@
 (global-set-key (kbd "C-c w k") 'windmove-up)
 (global-set-key (kbd "C-c w l") 'windmove-right)
 
+(global-set-key (kbd "C-c t") 'ansi-term)
+
 (setopt sentence-end-double-space nil)
 
 ;; Put all backup files into ~/.emacs.d/backups
@@ -112,7 +114,7 @@ If the new path's directories do not exist, create them."
                          ("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
 
-(setq packages '(go-mode cue-mode magit dockerfile-mode slime))
+(setq packages '(go-mode cue-mode magit dockerfile-mode slime lsp-mode))
 
 (defun pp/install-packages ()
   (interactive)
