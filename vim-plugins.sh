@@ -32,6 +32,7 @@ install_plugin "ale" "https://github.com/dense-analysis/ale.git"
 install_plugin "markdown-runner" "https://github.com/dbridges/vim-markdown-runner.git"
 install_plugin "tagbar" "https://github.com/preservim/tagbar.git"
 install_plugin "peekaboo" "https://github.com/junegunn/vim-peekaboo.git"
+install_plugin "taboo" "https://github.com/gcmt/taboo.vim.git"
 
 install_plugin "textobj-user" "https://github.com/kana/vim-textobj-user.git"
 install_plugin "textobj-indent" "https://github.com/kana/vim-textobj-indent.git"
