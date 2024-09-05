@@ -115,7 +115,7 @@ If the new path's directories do not exist, create them."
                          ("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
 
-(setq packages '(go-mode cue-mode magit dockerfile-mode slime lsp-mode treemacs-icons-dired))
+(setq packages '(go-mode cue-mode magit dockerfile-mode slime lsp-mode treemacs-icons-dired perspective))
 
 (defun pp/install-packages ()
   (interactive)
@@ -126,6 +126,13 @@ If the new path's directories do not exist, create them."
 
 (add-hook 'go-mode-hook 'lsp-deferred)
 (add-hook 'dired-mode-hook 'treemacs-icons-dired-mode)
+
+(require 'perspective)
+(customize-set-variable 'persp-mode-prefix-key (kbd "C-c p"))
+(persp-mode)
+
+(require 'ido)
+(ido-mode t)
 
 (defun pp/fix-utf ()
   (interactive)
