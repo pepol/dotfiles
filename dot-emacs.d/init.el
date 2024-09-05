@@ -1,6 +1,7 @@
 (setopt inhibit-splash-screen t)
 (menu-bar-mode -1)
-(scroll-bar-mode -1)
+(if (display-graphic-p)
+    (scroll-bar-mode -1))
 
 (setopt initial-major-mode 'fundamental-mode)
 (setopt display-time-default-load-average nil)
