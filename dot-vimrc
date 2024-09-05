@@ -23,6 +23,8 @@ set updatetime=100
 
 set sessionoptions+=tabpages,globals
 
+packadd! matchit
+
 " }}}
 
 " Section: Autocmd {{{
