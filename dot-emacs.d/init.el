@@ -1,5 +1,6 @@
 (setopt inhibit-splash-screen t)
 (menu-bar-mode -1)
+(scroll-bar-mode -1)
 
 (setopt initial-major-mode 'fundamental-mode)
 (setopt display-time-default-load-average nil)
@@ -128,6 +129,7 @@ If the new path's directories do not exist, create them."
 (add-hook 'dired-mode-hook 'treemacs-icons-dired-mode)
 
 (require 'perspective)
+(global-set-key (kbd "C-x C-b") 'persp-list-buffers)
 (customize-set-variable 'persp-mode-prefix-key (kbd "C-c p"))
 (persp-mode)
 
@@ -146,6 +148,9 @@ If the new path's directories do not exist, create them."
 (pp/fix-utf)
 
 (setq inferior-lisp-program (executable-find "sbcl"))
+
+(setq tab-bar-format
+      '(tab-bar-format-align-right tab-bar-format-global))
 
 (load "server")
 (unless (server-running-p)
