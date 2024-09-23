@@ -52,6 +52,8 @@ let g:cue_fmt_on_save=0
 let g:slime_target = "tmux"
 let g:slime_no_mappings = 1
 let g:ale_completion_enabled = 1
+let g:ale_set_quickfix = 1
+let g:ale_lint_on_text_changed = 'never'
 
 set omnifunc=ale#completion#OmniFunc
 set number
