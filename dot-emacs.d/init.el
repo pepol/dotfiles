@@ -132,6 +132,7 @@ If the new path's directories do not exist, create them."
   :config
   (dimmer-configure-which-key)
   (dimmer-mode t))
+(use-package go-playground :ensure t)
 
 (setq packages-git '((build :url "https://github.com/27justin/build.el.git")))
 (defun pp/install-packages-git ()
