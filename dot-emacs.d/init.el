@@ -127,6 +127,11 @@ If the new path's directories do not exist, create them."
 (use-package perspective :ensure t :bind ("C-x C-b" . persp-list-buffers) :custom (persp-mode-prefix-key (kbd "C-c p")) :init (persp-mode))
 (use-package terraform-mode :ensure t)
 (use-package magit-todos :ensure t :after magit :config (magit-todos-mode 1))
+(use-package dimmer
+  :ensure t
+  :config
+  (dimmer-configure-which-key)
+  (dimmer-mode t))
 
 (setq packages-git '((build :url "https://github.com/27justin/build.el.git")))
 (defun pp/install-packages-git ()
@@ -153,6 +158,8 @@ If the new path's directories do not exist, create them."
 
 (setq tab-bar-format
       '(tab-bar-format-align-right tab-bar-format-global))
+
+(setq x-select-enable-clipboard t)
 
 (load "server")
 (unless (server-running-p)
