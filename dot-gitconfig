@@ -9,7 +9,6 @@
   pager = less -x4
   editor = vim
   whitespace = trailing-space,space-before-tab,tab-in-indent
-  hooksPath = /Users/peter.polacik/.git/hooks
 
 [merge]
   summary = true
@@ -87,12 +86,15 @@
   sa = stash apply
   ss = stash save
   snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+
 [credential]
 	helper = osxkeychain
+
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[url "ssh://git@ghe.eng.sentinelone.tech/"]
-	insteadOf = https://ghe.eng.sentinelone.tech/
+
+[includeIf "gitdir:~/src/corp"]
+  path = ~/.gitconfig-corp
