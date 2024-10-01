@@ -85,13 +85,14 @@ If the new path's directories do not exist, create them."
 
 ;; Display line numbers in programming mode
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'yaml-mode-hook 'display-line-numbers-mode)
 (setopt display-line-numbers-width 3)
 
 ;; Nice line wrapping when working with text
 (add-hook 'text-mode-hook 'visual-line-mode)
 
 ;; Modes to highlight the current line with
-(let ((hl-line-hooks '(text-mode-hook prog-mode-hook)))
+(let ((hl-line-hooks '(text-mode-hook prog-mode-hook yaml-mode-hook)))
   (mapc (lambda (hook) (add-hook hook 'hl-line-mode)) hl-line-hooks))
 
 ;; Tab bar configuration
