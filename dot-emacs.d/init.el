@@ -125,7 +125,14 @@ If the new path's directories do not exist, create them."
 (use-package slime :ensure t)
 (use-package lsp-mode :ensure t :hook (go-mode . lsp-deferred))
 (use-package treemacs-icons-dired :ensure t :hook (dired-mode . treemacs-icons-dired-mode))
-(use-package perspective :ensure t :bind ("C-x C-b" . persp-list-buffers) :custom (persp-mode-prefix-key (kbd "C-c p")) :init (persp-mode))
+(use-package perspective
+  :ensure t
+  :bind ("C-x C-b" . persp-list-buffers)
+  :custom
+  (persp-mode-prefix-key (kbd "C-c p"))
+  (persp-state-default-file "~/.emacs.d/persp")
+  :hook (kill-emacs . persp-state-save)
+  :init (persp-mode))
 (use-package terraform-mode :ensure t)
 (use-package magit-todos :ensure t :after magit :config (magit-todos-mode 1))
 (use-package dimmer
