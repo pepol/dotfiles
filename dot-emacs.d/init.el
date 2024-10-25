@@ -120,13 +120,31 @@ If the new path's directories do not exist, create them."
                          ("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
 
-(use-package go-mode :ensure t)
-(use-package cue-mode :ensure t)
-(use-package magit :ensure t)
-(use-package dockerfile-mode :ensure t)
+;;;; Package configuratio
+
+;; Common Lisp
 (use-package slime :ensure t)
+
+;; Magit
+(use-package magit :ensure t)
+(use-package magit-todos :ensure t :after magit :config (magit-todos-mode 1))
+(use-package forge :ensure t :after magit)
+(setq auth-sources '("~/.authinfo"))
+
+;; Development utilities
 (use-package lsp-mode :ensure t :hook (go-mode . lsp-deferred))
+
+;; Development language support
+(use-package go-mode :ensure t)
+(use-package go-playground :ensure t)
+(use-package cue-mode :ensure t)
+(use-package dockerfile-mode :ensure t)
+(use-package terraform-mode :ensure t)
+
+;; Dired
 (use-package treemacs-icons-dired :ensure t :hook (dired-mode . treemacs-icons-dired-mode))
+
+;; Project management
 (use-package perspective
   :ensure t
   :bind ("C-x C-b" . persp-list-buffers)
@@ -135,8 +153,8 @@ If the new path's directories do not exist, create them."
   (persp-state-default-file "~/.emacs.d/persp")
   :hook (kill-emacs . persp-state-save)
   :init (persp-mode))
-(use-package terraform-mode :ensure t)
-(use-package magit-todos :ensure t :after magit :config (magit-todos-mode 1))
+
+;; Misc
 (use-package dimmer
   :ensure t
   :config
@@ -145,11 +163,8 @@ If the new path's directories do not exist, create them."
   (setq dimmer-use-colorspace :rgb)
   (dimmer-configure-which-key)
   (dimmer-mode t))
-(use-package go-playground :ensure t)
-(use-package forge :ensure t :after magit)
 
-(setq auth-sources '("~/.authinfo"))
-
+;; Packages NOT on *ELPA - installed from git
 (setq packages-git '((build :url "https://github.com/27justin/build.el.git")))
 (defun pp/install-packages-git ()
   (dolist (package packages-git)
