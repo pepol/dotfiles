@@ -158,9 +158,6 @@ If the new path's directories do not exist, create them."
 (use-package dimmer
   :ensure t
   :config
-  (setq dimmer-adjustment-mode :background)
-  (setq dimmer-fraction 0.1)
-  (setq dimmer-use-colorspace :rgb)
   (dimmer-configure-which-key)
   (dimmer-mode t))
 
