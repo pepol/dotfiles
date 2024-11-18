@@ -133,7 +133,20 @@ If the new path's directories do not exist, create them."
   (setq vertico-resize nil)
   (vertico-mode 1))
 (use-package marginalia :ensure t :config (marginalia-mode 1))
-(use-package orderless :ensure t :config (setq completion-styles '(orderless basic)))
+(use-package orderless
+  :ensure t
+  :config
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+(use-package vertico-directory
+  :after vertico
+  :ensure nil
+  :bind (:map vertico-map
+              ("RET" . vertico-directory-enter)
+              ("DEL" . vertico-directory-delete-char)
+              ("M-DEL" . vertico-directory-delete-word))
+  :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
 (use-package consult
   :ensure t
   :bind (
@@ -200,6 +213,7 @@ If the new path's directories do not exist, create them."
 (use-package embark
   :ensure t
   :bind (("C-." . embark-act)
+         ("M-." . embark-dwim)
          :map minibuffer-local-map
          ("C-c C-c" . embark-collect)
          ("C-c C-e" . embark-export)))
