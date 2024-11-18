@@ -15,7 +15,10 @@
 (global-auto-revert-mode)
 
 ;; Save history of minibuffer
-(savehist-mode)
+(savehist-mode 1)
+
+;; Save recently visited files.
+(recentf-mode 1)
 
 ;; Move through windows
 (global-set-key (kbd "C-c w h") 'windmove-left)
@@ -122,6 +125,92 @@ If the new path's directories do not exist, create them."
 
 ;;;; Package configuratio
 
+;; Minibuffer
+(use-package vertico
+  :ensure t
+  :config
+  (setq vertico-cycle t)
+  (setq vertico-resize nil)
+  (vertico-mode 1))
+(use-package marginalia :ensure t :config (marginalia-mode 1))
+(use-package orderless :ensure t :config (setq completion-styles '(orderless basic)))
+(use-package consult
+  :ensure t
+  :bind (
+         ;; C-c bindings
+         ("C-c M-x" . consult-mode-command)
+         ("C-c c h" . consult-history)
+         ("C-c c k" . consult-kmacro)
+         ("C-c c m" . consult-man)
+         ("C-c c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings (override defaults)
+         ("C-x M-x" . consult-complex-command)      ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                 ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window)  ;; orig. switch-to-buffer-other-window
+         ("C-x r b" . consult-bookmark)             ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)       ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)           ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                 ;; orig. yank-pop
+         ;; M-g bindings
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)
+         ("M-g g" . consult-goto-line)              ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)            ;; orig. goto-line
+         ("M-g o" . consult-outline)                ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings
+         ("M-s d" . consult-find)                   ;; Alternative: consult-fd
+         ("M-s c" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)          ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)        ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                   ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)             ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s"   . consult-history)                ;; orig. next-matching-history-element
+         ("M-r"   . consult-history))
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+  :init
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+  (advice-add #'register-preview :override #'consult-register-window)
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+  :config
+  (setq consult-preview-key "M-.")
+  (setq consult-narrow-key "<"))
+(use-package embark
+  :ensure t
+  :bind (("C-." . embark-act)
+         :map minibuffer-local-map
+         ("C-c C-c" . embark-collect)
+         ("C-c C-e" . embark-export)))
+(use-package embark-consult :ensure t :after (embark consult))
+(use-package wgrep
+  :ensure t
+  :bind ( :map grep-mode-map
+          ("e" . wgrep-change-to-wgrep-mode)
+          ("C-x C-q" . wgrep-change-to-wgrep-mode)
+          ("C-c C-c" . wgrep-finish-edit)))
+
 ;; Common Lisp
 (use-package slime :ensure t)
 
@@ -152,7 +241,10 @@ If the new path's directories do not exist, create them."
   (persp-mode-prefix-key (kbd "C-c p"))
   (persp-state-default-file "~/.emacs.d/persp")
   :hook (kill-emacs . persp-state-save)
-  :init (persp-mode))
+  :init
+  (consult-customize consult--source-buffer :hidden t :default nil)
+  (add-to-list 'consult-buffer-sources persp-consult-source)
+  (persp-mode 1))
 
 ;; Misc
 (use-package dimmer
@@ -168,9 +260,6 @@ If the new path's directories do not exist, create them."
     (unless (package-installed-p (car package))
       (package-vc-install package))))
 (pp/install-packages-git)
-
-(require 'ido)
-(ido-mode t)
 
 (defun pp/fix-utf ()
   (interactive)
