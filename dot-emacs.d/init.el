@@ -235,7 +235,7 @@ If the new path's directories do not exist, create them."
 (setq auth-sources '("~/.authinfo"))
 
 ;; Development utilities
-(use-package lsp-mode :ensure t :hook (go-mode . lsp-deferred))
+(use-package eglot :ensure nil :hook (go-mode . eglot-ensure))
 
 ;; Development language support
 (use-package go-mode :ensure t)
