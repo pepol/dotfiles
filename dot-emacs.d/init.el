@@ -250,16 +250,18 @@ If the new path's directories do not exist, create them."
 ;; Project management
 (use-package perspective
   :ensure t
-  :after consult
   :bind ("C-x C-b" . persp-list-buffers)
   :custom
   (persp-mode-prefix-key (kbd "C-c p"))
   (persp-state-default-file "~/.emacs.d/persp")
   :hook (kill-emacs . persp-state-save)
   :init
-  (consult-customize consult--source-buffer :hidden t :default nil)
-  (add-to-list 'consult-buffer-sources 'persp-consult-source)
   (persp-mode 1))
+
+(require 'consult)
+(require 'perspective)
+(consult-customize consult--source-buffer :hidden t :default nil)
+(add-to-list 'consult-buffer-sources 'persp-consult-source)
 
 ;; Misc
 (use-package dimmer
