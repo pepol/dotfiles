@@ -263,6 +263,17 @@ If the new path's directories do not exist, create them."
 (consult-customize consult--source-buffer :hidden t :default nil)
 (add-to-list 'consult-buffer-sources 'persp-consult-source)
 
+;; Cloud-native
+(use-package kubel
+  :ensure t
+  :after (vterm)
+  :config (kubel-vterm-setup))
+
+(use-package docker
+  :ensure t
+  :bind
+  ("C-c d" . docker))
+
 ;; Misc
 (use-package dimmer
   :ensure t
