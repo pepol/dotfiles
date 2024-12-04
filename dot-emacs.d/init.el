@@ -269,21 +269,6 @@ If the new path's directories do not exist, create them."
   :config
   (dimmer-configure-which-key)
   (dimmer-mode t))
-(use-package gptel
-  :ensure t
-  :config
-  (setq gptel-model 'llama-3.1-sonar-large-128k-chat
-        gptel-backend (gptel-make-openai "Perplexity AI"
-                                         :host "api.perplexity.ai"
-                                         :key #'gptel-api-key-from-auth-source
-                                         :endpoint "/chat/completions"
-                                         :stream t
-                                         :models '(
-                                                   llama-3.1-sonar-small-128k-online
-                                                   llama-3.1-sonar-large-128k-online
-                                                   llama-3.1-sonar-huge-128k-online
-                                                   llama-3.1-sonar-small-128k-chat
-                                                   llama-3.1-sonar-large-128k-chat))))
 
 ;; Packages NOT on *ELPA - installed from git
 (setq packages-git '((build :url "https://github.com/27justin/build.el.git")))
