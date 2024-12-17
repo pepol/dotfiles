@@ -281,6 +281,12 @@ If the new path's directories do not exist, create them."
   (dimmer-configure-which-key)
   (dimmer-mode t))
 
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+
 ;; Packages NOT on *ELPA - installed from git
 (setq packages-git '((build :url "https://github.com/27justin/build.el.git")))
 (defun pp/install-packages-git ()
