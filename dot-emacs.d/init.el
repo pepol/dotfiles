@@ -267,7 +267,14 @@ If the new path's directories do not exist, create them."
 (use-package kubel
   :ensure t
   :after (vterm)
+  :bind
+  ("C-c k" . kubel)
   :config (kubel-vterm-setup))
+
+;; (use-package kubernetes
+;;   :ensure t
+;;   :bind
+;;   ("C-c k" . kubernetes-overview))
 
 (use-package docker
   :ensure t
