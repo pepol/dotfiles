@@ -243,6 +243,7 @@ If the new path's directories do not exist, create them."
 (use-package cue-mode :ensure t)
 (use-package dockerfile-mode :ensure t)
 (use-package terraform-mode :ensure t)
+(use-package groovy-mode :ensure t)
 
 ;; Dired
 (use-package treemacs-icons-dired :ensure t :hook (dired-mode . treemacs-icons-dired-mode))
