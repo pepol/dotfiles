@@ -314,13 +314,6 @@ If the new path's directories do not exist, create them."
 
 (pp/fix-utf)
 
-(setq ql-slime-helpers (list (expand-file-name "~/.quicklisp/slime-helper.el")
-                             (expand-file-name "~/quicklisp/slime-helper.el")))
-(catch 'slime-helper-load
-  (dolist (helper-candidate ql-slime-helpers)
-    (when (file-exists-p helper-candidate)
-      (throw 'slime-helper-load
-        (load helper-candidate)))))
 (setq inferior-lisp-program (executable-find "sbcl"))
 
 (setq tab-bar-format
