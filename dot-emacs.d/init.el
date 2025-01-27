@@ -236,6 +236,13 @@ If the new path's directories do not exist, create them."
 
 ;; Development utilities
 (use-package eglot :ensure nil :hook (go-mode . eglot-ensure))
+(use-package build
+  :preface
+  (unless (package-installed-p 'build)
+    (package-vc-install
+     '(build
+       :url
+       "https://github.com/27justin/build.el.git"))))
 
 ;; Development language support
 (use-package go-mode :ensure t)
@@ -294,14 +301,6 @@ If the new path's directories do not exist, create them."
   :config
   (when (memq window-system '(mac ns x))
     (exec-path-from-shell-initialize)))
-
-;; Packages NOT on *ELPA - installed from git
-(setq packages-git '((build :url "https://github.com/27justin/build.el.git")))
-(defun pp/install-packages-git ()
-  (dolist (package packages-git)
-    (unless (package-installed-p (car package))
-      (package-vc-install package))))
-(pp/install-packages-git)
 
 (defun pp/fix-utf ()
   (interactive)
