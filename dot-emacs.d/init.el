@@ -236,6 +236,17 @@ If the new path's directories do not exist, create them."
 
 ;; Development utilities
 (use-package eglot :ensure nil :hook (go-mode . eglot-ensure))
+
+(use-package f :ensure t)  ;; Dependency for transient-compile
+(use-package s :ensure t)  ;; Dependency for transient-compile
+(use-package transient-compile
+  :preface
+  (unless (package-installed-p 'transient-compile)
+    (package-vc-install
+     '(transient-compile
+       :url
+       "https://github.com/gavv/transient-compile.git"))))
+
 (use-package build
   :preface
   (unless (package-installed-p 'build)
