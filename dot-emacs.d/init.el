@@ -224,6 +224,12 @@ If the new path's directories do not exist, create them."
           ("e" . wgrep-change-to-wgrep-mode)
           ("C-x C-q" . wgrep-change-to-wgrep-mode)
           ("C-c C-c" . wgrep-finish-edit)))
+(use-package consult-dir
+  :ensure t
+  :bind (("C-x C-d" . consult-dir)
+         :map vertico-map
+         ("C-x C-d" . consult-dir)
+         ("C-x C-j" . consult-dir-jump-file)))
 
 ;; Common Lisp
 (use-package slime :ensure t)
