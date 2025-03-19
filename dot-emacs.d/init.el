@@ -91,7 +91,13 @@ If the new path's directories do not exist, create them."
 ;; Display line numbers in programming mode
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (add-hook 'yaml-mode-hook 'display-line-numbers-mode)
+
 (setopt display-line-numbers-width 3)
+
+;; Highlight trailing whitespace in programming mode
+(defun pp/show-trailing-whitespace () (setq show-trailing-whitespace t))
+(add-hook 'prog-mode-hook 'pp/show-trailing-whitespace)
+(add-hook 'yaml-mode-hook 'pp/show-trailing-whitespace)
 
 ;; Nice line wrapping when working with text
 (add-hook 'text-mode-hook 'visual-line-mode)
@@ -262,7 +268,12 @@ If the new path's directories do not exist, create them."
        "https://github.com/27justin/build.el.git"))))
 
 ;; Development language support
-(use-package go-mode :ensure t)
+(use-package go-mode
+  :ensure t
+  :init
+  (defun pp/gofmt-hook ()
+    (add-hook 'before-save-hook 'gofmt-before-save))
+  :hook (go-mode . pp/gofmt-hook))
 (use-package go-playground :ensure t)
 (use-package cue-mode :ensure t)
 (use-package dockerfile-mode :ensure t)
@@ -271,6 +282,7 @@ If the new path's directories do not exist, create them."
 
 ;; Dired
 (use-package treemacs-icons-dired :ensure t :hook (dired-mode . treemacs-icons-dired-mode))
+
 
 ;; Project management
 (use-package perspective

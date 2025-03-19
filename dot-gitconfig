@@ -98,3 +98,7 @@
 
 [includeIf "gitdir:~/src/corp/"]
   path = ~/.gitconfig-corp
+
+# Needed for corp-specific go modules
+[includeIf "gitdir:~/go/"]
+  path = ~/.gitconfig-corp
