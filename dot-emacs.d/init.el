@@ -247,7 +247,21 @@ If the new path's directories do not exist, create them."
   (("C-," . consult-xref-stack-backward)))
 
 ;; Common Lisp
-(use-package slime :ensure t)
+(use-package sly :ensure t)
+(use-package sly-quicklisp :ensure t :after sly)
+(use-package sly-named-readtables :ensure t :after sly)
+(use-package sly-macrostep :ensure t :after sly)
+(use-package sly-stepper
+  :after sly
+  :preface
+  (unless (package-installed-p 'sly-stepper)
+    (package-vc-install
+     '(sly-stepper
+       :url "https://github.com/joaotavora/sly-stepper" :branch "master")))
+  :init
+  (add-to-list 'sly-contribs 'sly-stepper 'append))
+(use-package sly-asdf :ensure t :after sly)
+(use-package paredit :ensure t :hook (lisp-mode . enable-paredit-mode))
 
 ;; Magit
 (use-package magit :ensure t)
@@ -275,6 +289,10 @@ If the new path's directories do not exist, create them."
      '(build
        :url
        "https://github.com/27justin/build.el.git"))))
+
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; Development language support
 (use-package go-mode
