@@ -251,17 +251,12 @@ If the new path's directories do not exist, create them."
 (use-package sly-quicklisp :ensure t :after sly)
 (use-package sly-named-readtables :ensure t :after sly)
 (use-package sly-macrostep :ensure t :after sly)
-(use-package sly-stepper
-  :after sly
-  :preface
-  (unless (package-installed-p 'sly-stepper)
-    (package-vc-install
-     '(sly-stepper
-       :url "https://github.com/joaotavora/sly-stepper" :branch "master")))
-  :init
-  (add-to-list 'sly-contribs 'sly-stepper 'append))
 (use-package sly-asdf :ensure t :after sly)
-(use-package paredit :ensure t :hook (lisp-mode . enable-paredit-mode))
+(use-package paredit
+  :ensure t
+  :hook (lisp-mode . enable-paredit-mode)
+  :hook (emacs-lisp-mode . enable-paredit-mode)
+  :hook (common-lisp-mode . enable-paredit-mode))
 
 ;; Magit
 (use-package magit :ensure t)
