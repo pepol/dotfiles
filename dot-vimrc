@@ -10,7 +10,6 @@ syntax on
 set ruler
 set showcmd
 set modelines=1
-set showtabline=2
 set ff=unix
 set ffs=unix,dos
 set sw=2 sts=2 ts=2 et
@@ -88,15 +87,20 @@ nmap <leader>l :bnext<CR>
 nmap <leader>h :bprevious<CR>
 nmap <leader>bq :bp <BAR> bd #<CR>
 nmap <leader>bl :ls<CR>
-nmap <leader>s <Plug>SlimeMotionSend
-nmap <leader>ss <Plug>SlimeLineSend
-nmap <leader>d :NERDTreeToggle<CR>
-nmap <leader>g :vertical Git<CR>
-nmap <leader>p :CtrlP<CR>
-nmap <leader>ad <Plug>(ale_go_to_definition)
 
-autocmd FileType markdown nnoremap <buffer> <leader>r :MarkdownRunner<CR>
-autocmd FileType markdown nnoremap <buffer> <leader>R :MarkdownRunnerInsert<CR>
+"" CtrlP
+noremap <leader>p :CtrlP<CR>
+
+"" ALE
+noremap <leader>lc <Plug>(ale_code_action)
+noremap <leader>lr <Plug>(ale_rename)
+noremap K <Plug>(ale_hover)
+noremap gr <Plug>(ale_find_references)
+noremap <leader>li <Plug>(ale_go_to_implementation)
+noremap <leader>lt <Plug>(ale_go_to_type_definition)
+noremap gd <Plug>(ale_go_to_definition)
+noremap [g <Plug>(ale_previous_wrap)
+noremap ]g <Plug>(ale_next_wrap)
 
 " Insert Mode
 inoremap jj <esc>
@@ -106,7 +110,6 @@ inoremap <Left> <nop>
 inoremap <Right> <nop>
 
 " Visual Mode
-xmap <leader>s <Plug>SlimeRegionSend
 
 " }}}
 " vim:foldmethod=marker:foldlevel=0
