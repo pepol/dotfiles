@@ -236,15 +236,6 @@ If the new path's directories do not exist, create them."
          :map vertico-map
          ("C-x C-d" . consult-dir)
          ("C-x C-j" . consult-dir-jump-file)))
-(use-package consult-xref-stack
-  :after consult
-  :preface
-  (unless (package-installed-p 'consult-xref-stack)
-    (package-vc-install
-     '(consult-xref-stack
-       :url "https://github.com/brett-lampereur/consult-xref-stack")))
-  :bind
-  (("C-," . consult-xref-stack-backward)))
 
 ;; Common Lisp
 (use-package sly :ensure t)
