@@ -27,11 +27,20 @@ require("lazy").setup({
       priority = 1000,
       lazy = false,
       config = function()
-        vim.cmd([[colorscheme modus]])
+        vim.cmd.colorscheme "modus"
       end,
     },
-    { "nvim-telescope/telescope.nvim", tag = "0.1.8", dependencies = { "nvim-lua/plenary.nvim" } },
-    { "nvim-treesitter/nvim-treesitter", branch = "master", lazy = false, build = ":TSUpdate" },
+    {
+      "nvim-telescope/telescope.nvim",
+      tag = "0.1.8",
+      dependencies = { "nvim-lua/plenary.nvim" },
+    },
+    {
+      "nvim-treesitter/nvim-treesitter",
+      branch = "master",
+      lazy = false,
+      build = ":TSUpdate",
+    },
     { "neovim/nvim-lspconfig" },
     {
       "folke/which-key.nvim",
@@ -130,6 +139,14 @@ require("lazy").setup({
 -- LSP
 vim.lsp.enable("gopls")
 
+-- TS
+require'nvim-treesitter.configs'.setup({
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
+})
+
 -- Keybindings
 -- Normal mode
 vim.keymap.set("n", "<leader>n", ":set invnumber<CR>")
@@ -152,3 +169,9 @@ vim.o.shiftwidth = 2
 vim.o.softtabstop = 2
 vim.o.tabstop = 2
 vim.o.colorcolumn = "80"
+vim.o.foldmethod = "expr"
+vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.o.foldlevel = 99
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.inccommand = "split"
