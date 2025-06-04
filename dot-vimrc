@@ -28,6 +28,8 @@ packadd! matchit
 
 " Section: Autocmd {{{
 
+command! GoFmt silent %!gofmt
+
 if has("autocmd")
   filetype plugin indent on
   augroup vimrcEx
@@ -36,6 +38,7 @@ if has("autocmd")
     \ exe "normal g`\"" |
     \ endif
   augroup END
+"  autocmd BufWritePre *.go GoFmt
   au BufRead,BufNewFile *.go set filetype=go
   au BufRead,BufNewFile *.tf set filetype=terraform
   au BufRead,BufNewFile *.hcl set filetype=terraform

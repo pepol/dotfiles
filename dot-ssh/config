@@ -1,3 +1,5 @@
+Include /Users/peter.polacik/.colima/ssh_config
+
 Host *.ropenic.net
   User pp
 
