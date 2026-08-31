@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+# Link this repo into $HOME.
+#
+# Everything linkable lives under a top-level dot-* entry, and `dot-` at the
+# start of any path component becomes `.`:
+#
+#     dot-zshrc                  -> ~/.zshrc
+#     dot-config/nvim/init.lua   -> ~/.config/nvim/init.lua
+#
+# Files are linked one by one and directories are always created for real.
+# Never symlink a directory: ~/.config and ~/.local/bin are shared with mise
+# shims, Neovim's lockfile, herdr's socket and logs and plenty else, and a
+# directory symlink would land all of that inside the git checkout.
+#
+#     scripts/link              link (default)
+#     scripts/link --unlink     remove the links again
+#     scripts/link --dry-run    print what would change
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+cd "$DOTFILES"
+
+mode=link
+dry=0
+for arg in "$@"; do
+	case "$arg" in
+		--unlink) mode=unlink ;;
+		--dry-run|-n) dry=1 ;;
+		*) echo "link: unknown argument $arg" >&2; exit 2 ;;
+	esac
+done
+
+# dot-config/nvim -> .config/nvim. Only at the start of a component, so a file
+# legitimately called "dot-matrix" keeps its name.
+target_of() {
+	printf '%s\n' "$1" | sed -e 's|^dot-|.|' -e 's|/dot-|/.|g'
+}
+
+linked=0 skipped=0 conflicts=0 removed=0
+
+while IFS= read -r source; do
+	target="$HOME/$(target_of "$source")"
+	absolute="$DOTFILES/$source"
+
+	if [ "$mode" = unlink ]; then
+		# Only ever remove a link that points back into this repo. Anything
+		# else in that spot belongs to someone else.
+		if [ -L "$target" ] && [ "$(readlink "$target")" = "$absolute" ]; then
+			[ "$dry" -eq 1 ] && echo "would remove $target" || rm "$target"
+			removed=$((removed + 1))
+		fi
+		continue
+	fi
+
+	if [ -L "$target" ] && [ "$(readlink "$target")" = "$absolute" ]; then
+		skipped=$((skipped + 1))
+		continue
+	fi
+
+	# A real file, or a link somewhere else: report it rather than clobbering
+	# whatever the user already had there.
+	if [ -e "$target" ] && [ ! -L "$target" ]; then
+		echo "conflict: $target already exists" >&2
+		conflicts=$((conflicts + 1))
+		continue
+	fi
+
+	if [ "$dry" -eq 1 ]; then
+		echo "would link $target -> $absolute"
+	else
+		mkdir -p "$(dirname "$target")"
+		# -f replaces a stale link from an older layout; -n keeps it from
+		# being followed into a directory it used to point at.
+		ln -sfn "$absolute" "$target"
+	fi
+	linked=$((linked + 1))
+done < <(
+	# Everything under a top-level dot-* entry, minus git's own placeholders.
+	find dot-* -type f -not -name .gitkeep | sort
+)
+
+if [ "$mode" = unlink ]; then
+	echo "link: removed $removed symlink(s) from $HOME"
+	exit 0
+fi
+
+# Scripts lose their mode bit through git on some checkouts, and we link
+# rather than copy, so fix the source.
+chmod +x "$DOTFILES"/dot-local/bin/*
+
+if [ "$conflicts" -gt 0 ]; then
+	cat >&2 <<-MSG
+
+	link: $conflicts file(s) already exist and were left alone.
+
+	Each one is a real file where this repo wants a symlink. Move it aside
+	and re-run:
+
+	    mv ~/.zshrc ~/.zshrc.pre-dotfiles
+	    mise run link
+
+	MSG
+	exit 1
+fi
+
+echo "link: $linked linked, $skipped already current"

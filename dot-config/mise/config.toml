@@ -1,0 +1,38 @@
+# Global tool versions. Stowed to ~/.config/mise/config.toml so these resolve
+# from any directory, not just from the dotfiles checkout.
+#
+# Neovim and herdr are the two halves of the workflow, so they are pinned to a
+# minor series: patch releases arrive with `mise upgrade`, a minor bump is a
+# deliberate edit here.
+
+[tools]
+# Editor, diff viewer, prompt composer. 0.12 is what the config targets: it
+# relies on vim.lsp.enable(), the built-in 'autocomplete' and vim.pack-era
+# treesitter defaults, none of which exist in 0.11.
+#
+# The aqua backend is used explicitly rather than the registry default
+# (vfox:mise-plugins/vfox-neovim), which resolves releases through the GitHub
+# API and therefore rate-limits without a token.
+"aqua:neovim/neovim" = "0.12"
+
+# Terminal multiplexer and agent orchestrator.
+herdr = "0.8"
+
+# Used by the Neovim config and the herdr integration scripts.
+ripgrep = "latest"   # telescope live_grep, :grep
+fd = "latest"        # telescope find_files
+fzf = "latest"       # herdr-prompt / herdr-project pickers
+jq = "latest"        # shell-side herdr JSON, ad-hoc use
+lazygit = "latest"   # bound to prefix+alt+g as a herdr popup
+delta = "latest"     # git pager
+
+# Language runtimes. Neovim starts the servers these ship; mise resolves them.
+go = "latest"        # gopls
+node = "latest"      # vtsls
+python = "latest"
+rust = "latest"      # rust-analyzer
+
+# Language servers with no toolchain of their own. cue and lua-language-server
+# come from the Brewfile; these two are npm-only.
+"npm:@vtsls/language-server" = "latest"
+"npm:yaml-language-server" = "latest"

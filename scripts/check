@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Lint the scripts and load the Neovim config, without touching $HOME.
+set -uo pipefail
+
+DOTFILES="${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+cd "$DOTFILES"
+fail=0
+
+echo "shell scripts"
+for script in scripts/* dot-local/bin/*; do
+	[ -f "$script" ] || continue
+	case "$(head -1 "$script")" in
+		*bash*|*/sh) bash -n "$script" && echo "  ok   $script" || fail=1 ;;
+	esac
+done
+if command -v shellcheck >/dev/null 2>&1; then
+	shellcheck -S warning scripts/* dot-local/bin/nv dot-local/bin/tf-file || fail=1
+else
+	echo "  --   shellcheck not installed, syntax check only"
+fi
+
+echo
+echo "python"
+# Parse rather than py_compile, which would litter __pycache__ through the
+# repo. The library module has no shebang, so match on it by name too.
+for script in dot-local/bin/* dot-local/lib/herdr/*.py; do
+	[ -f "$script" ] || continue
+	case "$script:$(head -1 "$script")" in
+		*.py:*|*:*python3*)
+			if python3 -c "import ast,sys; ast.parse(open(sys.argv[1]).read())" "$script"; then
+				echo "  ok   $script"
+			else
+				fail=1
+			fi
+			;;
+	esac
+done
+
+echo
+echo "neovim config"
+if command -v nvim >/dev/null 2>&1; then
+	# A throwaway XDG root, so this never writes into the real config or
+	# installs plugins over the top of a working setup.
+	root=$(mktemp -d)
+	mkdir -p "$root/config"
+	cp -r dot-config/nvim "$root/config/nvim"
+	if XDG_CONFIG_HOME="$root/config" XDG_DATA_HOME="$root/data" \
+	   XDG_STATE_HOME="$root/state" XDG_CACHE_HOME="$root/cache" \
+	   nvim --headless +qa 2>&1 | grep -qiE '^E[0-9]+:'; then
+		echo "  FAIL config raises errors"; fail=1
+	else
+		echo "  ok   config loads"
+	fi
+	# nvim leaves background jobs writing under data/ for a moment.
+	rm -rf "$root" 2>/dev/null || true
+else
+	echo "  --   nvim not installed, skipped"
+fi
+
+echo
+[ "$fail" -eq 0 ] && echo "clean." || echo "problems found."
+exit "$fail"

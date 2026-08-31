@@ -1,0 +1,3 @@
+#!/bin/sh
+# Short name for the editor router. Agents and humans both type this.
+exec herdr-nvim "$@"

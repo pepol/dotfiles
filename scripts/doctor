@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Check that the pieces of the workflow can actually see each other.
+# Exits non-zero if something that should work will not.
+set -uo pipefail
+
+fail=0
+ok()   { printf '  \033[32mok\033[0m   %s\n' "$1"; }
+bad()  { printf '  \033[31mFAIL\033[0m %s\n' "$1"; fail=1; }
+note() { printf '  --   %s\n' "$1"; }
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+echo "tools"
+for tool in nvim herdr git; do
+	if have "$tool"; then ok "$tool ($(command -v "$tool"))"; else bad "$tool not on PATH"; fi
+done
+
+if have nvim; then
+	version=$(nvim --version | head -1 | sed 's/^NVIM v//')
+	case "$version" in
+		0.1[2-9]*|0.[2-9]*|[1-9]*) ok "neovim $version" ;;
+		*) bad "neovim $version is too old; this config needs 0.12" ;;
+	esac
+fi
+
+echo
+echo "editor routing"
+for script in herdr-nvim nv herdr-project herdr-sidebar-numbers; do
+	if have "$script"; then ok "$script"; else bad "$script not on PATH (mise run link)"; fi
+done
+if [ -r "$HOME/.local/lib/herdr/herdr_ipc.py" ]; then
+	ok "herdr_ipc.py"
+else
+	bad "~/.local/lib/herdr/herdr_ipc.py missing (mise run link)"
+fi
+case "${EDITOR:-}" in
+	*herdr-nvim) ok "\$EDITOR is $EDITOR" ;;
+	"") bad "\$EDITOR is unset; open a new shell so .zshrc applies" ;;
+	*) bad "\$EDITOR is $EDITOR, expected herdr-nvim" ;;
+esac
+
+echo
+echo "neovim config"
+if have nvim; then
+	if nvim --headless "+lua vim.cmd('qa')" +qa 2>&1 | grep -qiE '^E[0-9]+|error'; then
+		bad "config raises errors on startup; run: nvim --headless +qa"
+	else
+		ok "config loads without errors"
+	fi
+	for plugin in herdr-splits.nvim herdr-context.nvim; do
+		if [ -d "${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/$plugin" ]; then
+			ok "$plugin installed"
+		else
+			bad "$plugin not installed (mise run nvim-sync, inside a herdr pane)"
+		fi
+	done
+fi
+
+echo
+echo "herdr"
+if [ "${HERDR_ENV:-}" = 1 ]; then
+	ok "running inside a herdr pane (workspace ${HERDR_WORKSPACE_ID:-?})"
+	if herdr plugin list 2>/dev/null | grep -q herdr-splits; then
+		ok "herdr-splits herdr plugin installed"
+	else
+		bad "herdr-splits herdr plugin missing; ctrl+hjkl will not cross panes"
+		note "fix: herdr plugin install lmilojevicc/herdr-splits.nvim"
+	fi
+	if herdr plugin list 2>/dev/null | grep -q herdr-context; then
+		ok "herdr-context herdr plugin installed"
+	else
+		note "herdr-context herdr plugin missing (only its target picker needs it)"
+	fi
+else
+	note "not inside a herdr pane; skipping the herdr plugin checks"
+fi
+
+echo
+if [ "$fail" -eq 0 ]; then
+	echo "everything checks out."
+else
+	echo "some checks failed; see above."
+fi
+exit "$fail"

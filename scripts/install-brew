@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Install Homebrew if it is missing, then apply the Brewfile.
+set -euo pipefail
+
+cd "${DOTFILES:-$(cd "$(dirname "$0")/.." && pwd)}"
+
+if [ "$(uname -s)" != "Darwin" ]; then
+	echo "brew: not macOS, skipping Homebrew and the Brewfile"
+	exit 0
+fi
+
+if ! command -v brew >/dev/null 2>&1; then
+	# The installer is interactive about sudo; that is intentional on a first run.
+	echo "brew: installing Homebrew"
+	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# A fresh install is not on PATH yet in this shell.
+for prefix in /opt/homebrew /usr/local; do
+	if [ -x "$prefix/bin/brew" ]; then
+		eval "$("$prefix/bin/brew" shellenv)"
+		break
+	fi
+done
+
+command -v brew >/dev/null 2>&1 || {
+	echo "brew: still not on PATH after install" >&2
+	exit 1
+}
+
+echo "brew: applying Brewfile"
+brew bundle install --file=Brewfile

@@ -1,0 +1,155 @@
+[user]
+  name = Peter Polacik
+  email = peter@polacik.org
+
+[color]
+  ui = true
+
+[core]
+  pager = delta
+  # herdr-nvim, so `git commit` from any pane opens a tab in the Neovim that
+  # owns the workspace and blocks until it is closed.
+  editor = herdr-nvim
+  whitespace = trailing-space,space-before-tab,tab-in-indent
+
+[interactive]
+  diffFilter = delta --color-only
+
+[delta]
+  navigate = true
+  line-numbers = true
+  hyperlinks = true
+
+# --- diff and merge ---------------------------------------------------------
+# Reading a change is Neovim's job. Two routes, deliberately:
+#
+#   git difftool / mergetool  -> nvim in this pane, for a one-off file
+#   :DiffviewOpen             -> in the workspace editor, for a whole change
+#
+# difftool starts its own nvim rather than routing through herdr-nvim because
+# it needs -d, and Neovim's remote protocol cannot open a diff in a running
+# instance.
+[diff]
+  mnemonicPrefix = true
+  algorithm = histogram
+  colorMoved = default
+  tool = nvimdiff
+
+[difftool]
+  prompt = false
+
+[merge]
+  summary = true
+  tool = nvimdiff
+  # Keep the common ancestor in conflict markers; diffview's diff3 layout and
+  # <leader>d1/d2/d3 both rely on it.
+  conflictStyle = zdiff3
+
+[mergetool]
+  prompt = false
+  keepBackup = false
+
+[mergetool "nvimdiff"]
+  layout = LOCAL,BASE,REMOTE / MERGED
+
+[push]
+  default = current
+  autoSetupRemote = true
+
+[pull]
+  default = current
+  rebase = true
+
+[rebase]
+  autosquash = true
+  autostash = true
+
+[rerere]
+  enabled = true
+
+[branch]
+  autoSetupRebase = always
+
+[apply]
+  whitespace = nowarn
+
+[init]
+  defaultBranch = main
+
+[alias]
+  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+  lnc = log --pretty=format:"%h\\ %s \\ [%cn]"
+  lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+  ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%s\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+  le = log --oneline --decorate
+
+  filelog = log -u
+  fl = log -u
+
+  dl = "!git ll -1"
+
+  dr = "!f() { git diff \"$1\"^..\"$1\"; }; f"
+  diffr = "!f() { git diff \"$1\"^..\"$1\"; }; f"
+  lc = "!f() { git ll \"$1\"^..\"$1\"; }; f"
+
+  f = "!git ls-files | grep -i"
+  grep = grep -Ii
+  gr = grep -Ii
+
+  la = "!git config -l | grep alias | cut -c 7-"
+
+  lasttag = describe --tags --abbrev=0
+  lt = describe --tags --abbrev=0
+
+  cp = cherry-pick
+  st = status -s
+  cl = clone
+  ci = commit
+  cm = commit -m
+  cma = commit -a -m
+  ca = commit --amend
+  amend = commit --amend
+  caa = commit -a --amend -C HEAD
+  co = checkout
+  br = branch
+  dc = diff --cached
+  r = reset
+  r1 = reset HEAD^
+  r2 = reset HEAD^^
+  rh = reset --hard
+  rh1 = reset HEAD^ --hard
+  rh2 = reset HEAD^^ --hard
+  ai = add --interactive
+
+  sl = stash list
+  sa = stash apply
+  ss = stash save
+  snapshot = !git stash save "snapshot: $(date)" && git stash apply "stash@{0}"
+
+  # Worktrees are how parallel agent work stays isolated; herdr-project
+  # creates them, these inspect and clean up.
+  wt = worktree list
+  wtp = worktree prune
+
+[credential]
+  helper = osxkeychain
+
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+
+[url "git@github.com:"]
+  insteadOf = "https://github.com"
+
+[includeIf "gitdir:~/src/corp/"]
+  path = ~/.gitconfig-corp
+
+# Needed for corp-specific go modules
+[includeIf "gitdir:~/go/"]
+  path = ~/.gitconfig-corp
+
+[includeIf "gitdir:~/src/personal/"]
+  path = ~/.gitconfig-local

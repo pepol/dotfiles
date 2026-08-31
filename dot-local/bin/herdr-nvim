@@ -1,0 +1,161 @@
+#!/usr/bin/env python3
+"""Route every edit into the one Neovim that owns the current workspace.
+
+This is $EDITOR, $VISUAL and $GIT_EDITOR. Whatever asks for an editor -- `git
+commit` in a shell pane, `git rebase -i`, `gh pr create`, a coding agent
+opening a file, herdr's own prefix+e scrollback edit -- lands as a new tab in
+the Neovim already running in this workspace, and blocks until you close that
+tab. The blocking is what makes it usable as $EDITOR: git only proceeds once
+the buffer is gone.
+
+Resolution order:
+
+  1. $NVIM        -- already inside a Neovim terminal buffer, so talk to that
+                     instance. A nested Neovim is what we are avoiding.
+  2. the workspace server, when one is live -- open there and focus its pane.
+  3. nothing      -- become the workspace server, listening on the registry
+                     socket so the next call takes branch 2.
+
+Outside herdr it degrades to plain `nvim`. So does any invocation carrying
+Neovim options (`nv -d a b`, `nv +42 file`): those describe how one editor
+process should start, which a remote tab cannot honour.
+"""
+
+import os
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, os.path.expanduser("~/.local/lib/herdr"))
+import herdr_ipc  # noqa: E402
+
+# Fast enough to feel immediate on :wq, slow enough to be free when idle.
+POLL_SECONDS = 0.15
+
+
+def routable(args):
+    """True when these arguments are plain file paths.
+
+    Only files can be handed to a running server as a new tab. `-d`, `+cmd`
+    and friends configure a starting Neovim, so an invocation using them runs
+    its own.
+    """
+    return all(not arg.startswith(("-", "+")) for arg in args)
+
+
+def run_local(args):
+    """Run Neovim in this pane, claiming the workspace socket if it is free.
+
+    exec rather than spawn: this process is what the shell put in the
+    foreground, and Neovim needs to own that terminal directly.
+
+    The socket is passed with --listen rather than registered from inside the
+    config so it exists before the first plugin loads; an $EDITOR call racing
+    startup would otherwise find no server and start a second Neovim.
+    """
+    cmd = ["nvim"]
+    workspace = os.environ.get("HERDR_WORKSPACE_ID")
+    if workspace and herdr_ipc.in_herdr():
+        sock = herdr_ipc.workspace_socket(workspace)
+        # A crashed Neovim leaves its socket file behind and --listen refuses
+        # to bind over one that already exists.
+        if os.path.exists(sock) and not herdr_ipc.nvim_alive(sock):
+            try:
+                os.unlink(sock)
+            except OSError:
+                pass
+        if not os.path.exists(sock):
+            cmd += ["--listen", sock]
+            # Record which pane this editor lives in, so a later $EDITOR call
+            # from a sibling pane can bring it into view rather than only
+            # opening a tab in something the user cannot see.
+            pane = os.environ.get("HERDR_PANE_ID")
+            if pane:
+                try:
+                    with open(herdr_ipc.pane_file(workspace), "w") as handle:
+                        handle.write(pane + "\n")
+                except OSError:
+                    pass
+    os.execvp("nvim", cmd + args)
+
+
+def remote_edit(server, args):
+    """Open args as tabs in `server` and wait for the user to close them.
+
+    Neovim does not implement Vim's --remote-tab-wait (it answers E5600), so
+    the wait is done here: open the files, then poll until none of them is
+    displayed in a window any more. "No longer on screen" is the right
+    signal rather than "buffer gone", because :wq leaves the buffer listed
+    but hidden, and git only needs the user to be finished looking at it.
+    """
+    paths = [os.path.abspath(arg) for arg in args]
+
+    opened = subprocess.call(
+        ["nvim", "--server", server, "--remote-tab"] + paths,
+        stdin=subprocess.DEVNULL,
+    )
+    if opened != 0:
+        return opened
+
+    # One expression covering every file, so waiting costs one round trip per
+    # poll no matter how many files were opened.
+    expr = "+".join(
+        "len(win_findbuf(bufnr(%s)))" % herdr_ipc.vim_string(path)
+        for path in paths
+    )
+
+    while True:
+        time.sleep(POLL_SECONDS)
+        shown = herdr_ipc.remote_expr(server, expr)
+        if shown is None:
+            # The editor went away entirely. Nothing left to wait for.
+            return 0
+        if shown == "0":
+            return 0
+
+
+def main(argv):
+    args = argv[1:]
+
+    # Inside a Neovim terminal buffer: use that instance, whichever workspace
+    # it belongs to. This is the case `git commit` hits from :terminal.
+    inner = os.environ.get("NVIM")
+    if inner and args and routable(args):
+        return remote_edit(inner, args)
+
+    workspace = os.environ.get("HERDR_WORKSPACE_ID")
+    if not (herdr_ipc.in_herdr() and workspace and args and routable(args)):
+        run_local(args)  # never returns
+
+    sock = herdr_ipc.workspace_socket(workspace)
+    if not herdr_ipc.nvim_alive(sock):
+        run_local(args)  # never returns
+
+    # There is a live editor for this project. Move the user's eyes to it,
+    # remembering where they were so we can put them back.
+    origin = None
+    owner = herdr_ipc.read_pane_owner(workspace)
+    if owner:
+        try:
+            here = herdr_ipc.current_pane_id()
+            if here != owner:
+                herdr_ipc.focus_pane(owner)
+                origin = here
+        except herdr_ipc.HerdrError:
+            origin = None
+
+    try:
+        return remote_edit(sock, args)
+    finally:
+        # Return to the pane that asked for the editor, so the shell that ran
+        # `git commit` is in front of you when it prints the result. Set
+        # HERDR_NVIM_RETURN_FOCUS=0 to stay in the editor instead.
+        if origin and os.environ.get("HERDR_NVIM_RETURN_FOCUS") != "0":
+            try:
+                herdr_ipc.focus_pane(origin)
+            except herdr_ipc.HerdrError:
+                pass
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

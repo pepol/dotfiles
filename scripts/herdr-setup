@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Install herdr's built-in integrations for the agents we actually run.
+#
+# An integration is what lets herdr resume a native agent session after a
+# server restart and report session identity, rather than only guessing state
+# from what the pane prints.
+set -euo pipefail
+
+command -v herdr >/dev/null 2>&1 || {
+	echo "herdr-setup: herdr is not installed (mise run tools installs it)" >&2
+	exit 1
+}
+
+# Keep this list to agents that are installed; `integration install` for an
+# absent agent is a no-op that still prints an error.
+AGENTS=(claude codex cursor opencode)
+
+for agent in "${AGENTS[@]}"; do
+	if herdr integration install "$agent" >/dev/null 2>&1; then
+		echo "herdr-setup: installed integration for $agent"
+	else
+		echo "herdr-setup: skipped $agent (not installed)"
+	fi
+done
+
+herdr integration status

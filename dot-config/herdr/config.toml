@@ -1,0 +1,187 @@
+# herdr: multiplexer and agent orchestrator.
+#
+# Neovim is the editor for everything textual. $EDITOR is herdr-nvim, which
+# routes any editor request from any pane into the one Neovim that owns this
+# workspace, so `git commit` in a shell pane and prefix+e below both open a
+# tab in the editor you already have on screen.
+
+[keys]
+prefix = "ctrl+x"
+
+# Modifier convention, all after the ctrl+x prefix:
+#   plain hjkl  focus a pane
+#   ctrl+hjkl   move (swap) a pane
+#   shift+hjkl  focus a container: h/l tabs (horizontal), j/k workspaces (vertical)
+#   1..9        tab, shift+1..9 workspace, ctrl+1..9 agent row
+#
+# alt+ is deliberately unused: AeroSpace claims alt+hjkl, alt+1..9, alt+shift+*
+# and alt+tab at the OS level, and Ghostty sets macos-option-as-alt.
+#
+# To send a literal ctrl+x to the focused pane, press the prefix twice.
+# That is built in, so prefix+x stays on its default: close pane.
+
+# --- Tabs -------------------------------------------------------------------
+# switch_tab (prefix+1..9), new_tab (prefix+c), rename_tab (prefix+shift+t),
+# close_tab (prefix+shift+x) and next/previous_tab (prefix+n / prefix+p)
+# all keep their defaults.
+
+# hjkl-native aliases for prefix+n / prefix+p.
+previous_tab = "prefix+shift+h"
+next_tab = "prefix+shift+l"
+
+# Reorder the current tab within the workspace.
+move_tab_previous = "prefix+comma"
+move_tab_next = "prefix+period"
+
+# --- Workspaces -------------------------------------------------------------
+# The sidebar is vertical, so workspaces move on the j/k axis.
+switch_workspace = "prefix+shift+1..9"
+next_workspace = "prefix+shift+j"
+previous_workspace = "prefix+shift+k"
+
+# --- Agents -----------------------------------------------------------------
+next_agent = "prefix+a"
+previous_agent = "prefix+shift+a"
+
+# ctrl+<digit> has no legacy terminal encoding; this only fires when the outer
+# terminal negotiates the Kitty keyboard protocol. Harmless if it does not.
+focus_agent = "prefix+ctrl+1..9"
+
+# --- Panes ------------------------------------------------------------------
+# focus_pane_* (prefix+hjkl) keeps its default, as the fallback for panes that
+# are not Neovim. The seamless version is on bare ctrl+hjkl below.
+last_pane = "prefix+tab"
+cycle_pane_next = "prefix+space"
+cycle_pane_previous = "prefix+shift+tab"
+
+# Scrollback opens in $EDITOR, which is herdr-nvim, so a pane's history lands
+# in the workspace editor as an ordinary buffer: searchable, yankable, and
+# stageable into an agent prompt with <leader>aY.
+edit_scrollback = "prefix+e"
+
+# Swap the focused pane with its adjacent neighbor. On ctrl rather than shift
+# so the shift layer belongs entirely to tabs and workspaces.
+[[keys.command]]
+key = "prefix+ctrl+h"
+type = "shell"
+command = "herdr pane swap --current --direction left"
+description = "move pane left"
+
+[[keys.command]]
+key = "prefix+ctrl+j"
+type = "shell"
+command = "herdr pane swap --current --direction down"
+description = "move pane down"
+
+[[keys.command]]
+key = "prefix+ctrl+k"
+type = "shell"
+command = "herdr pane swap --current --direction up"
+description = "move pane up"
+
+[[keys.command]]
+key = "prefix+ctrl+l"
+type = "shell"
+command = "herdr pane swap --current --direction right"
+description = "move pane right"
+
+# --- Seamless navigation ----------------------------------------------------
+# herdr-splits.nvim: these walk Neovim's splits first and cross into the
+# neighbouring herdr pane only once Neovim has no window left that way. The
+# same four keys therefore work identically whether the focused pane holds the
+# editor or a shell, with no prefix.
+#
+# The cost is ctrl+h, which is also ASCII backspace. The Backspace key sends
+# DEL and is unaffected; only the literal ctrl+h chord is taken.
+#
+# Install the herdr half with: mise run herdr-setup
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "herdr-splits.nav-left"
+description = "focus left (nvim-aware)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "herdr-splits.nav-down"
+description = "focus down (nvim-aware)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "herdr-splits.nav-up"
+description = "focus up (nvim-aware)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "herdr-splits.nav-right"
+description = "focus right (nvim-aware)"
+
+# Resizing, same idea. On ctrl+alt because AeroSpace owns plain alt+hjkl;
+# these chords must match resize_keys in lua/plugins/herdr.lua.
+[[keys.command]]
+key = "ctrl+alt+h"
+type = "plugin_action"
+command = "herdr-splits.resize-left"
+description = "resize left (nvim-aware)"
+
+[[keys.command]]
+key = "ctrl+alt+j"
+type = "plugin_action"
+command = "herdr-splits.resize-down"
+description = "resize down (nvim-aware)"
+
+[[keys.command]]
+key = "ctrl+alt+k"
+type = "plugin_action"
+command = "herdr-splits.resize-up"
+description = "resize up (nvim-aware)"
+
+[[keys.command]]
+key = "ctrl+alt+l"
+type = "plugin_action"
+command = "herdr-splits.resize-right"
+description = "resize right (nvim-aware)"
+
+# --- Popups -----------------------------------------------------------------
+# Git review that does not disturb the layout. The in-editor equivalent is
+# <leader>gd / <leader>gr (diffview.nvim); this is for when focus is in a
+# shell or agent pane.
+[[keys.command]]
+key = "prefix+g"
+type = "popup"
+command = "lazygit"
+description = "lazygit"
+width = "90%"
+height = "90%"
+
+# --- Sidebar ----------------------------------------------------------------
+# $n is the positional index that switch_workspace and focus_agent jump to.
+# It has no built-in token, so herdr-sidebar-numbers reports it as workspace
+# and pane metadata; without that running the slot renders empty.
+[ui.sidebar.spaces]
+rows = [[{ token = "$n", dim = true }, "state_icon", "workspace"], ["branch", "git_status"]]
+
+[ui.sidebar.agents]
+rows = [[{ token = "$n", dim = true }, "state_icon", "workspace", "tab"], ["agent"]]
+
+[ui]
+# Tell the editor pane and the agent pane apart at a glance.
+show_agent_labels_on_pane_borders = true
+
+[ui.toast]
+# An agent finishing in a background workspace should reach the OS, since the
+# foreground workspace is usually Neovim with the sidebar collapsed.
+delivery = "system"
+
+[session]
+# Bring agents back into their own conversations after a server restart,
+# rather than a bare shell. Requires the integrations mise run herdr-setup
+# installs.
+resume_agents_on_restore = true
+
+[experimental]
+# Requires a Kitty graphics-compatible outer terminal -- Ghostty qualifies.
+kitty_graphics = true

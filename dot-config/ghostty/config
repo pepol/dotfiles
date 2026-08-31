@@ -1,0 +1,14 @@
+# Ghostty is the outer terminal; herdr runs inside it and owns the layout, so
+# this file stays small on purpose.
+
+keybind = global:ctrl+backquote=toggle_quick_terminal
+
+# Send macOS Option as terminal Alt so Alt keybindings reach herdr and Neovim
+# rather than inserting accented characters. AeroSpace claims alt+hjkl,
+# alt+1..9 and alt+shift+* before this, which is why herdr's own bindings
+# avoid the plain alt layer.
+macos-option-as-alt = true
+
+# herdr negotiates the Kitty keyboard protocol through Ghostty. That is what
+# makes chords with no legacy encoding work: prefix+ctrl+1..9 to focus an
+# agent row, and ctrl+alt+hjkl to resize across the editor/pane boundary.

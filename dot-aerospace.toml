@@ -1,0 +1,87 @@
+config-version = 2
+
+persistent-workspaces = []
+
+start-at-login = true
+
+enable-normalization-flatten-containers = false
+enable-normalization-opposite-orientation-for-nested-containers = false
+
+accordion-padding = 0
+
+# You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
+# Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
+# Also see: https://nikitabobko.github.io/AeroSpace/goodies#disable-hide-app
+automatically-unhide-macos-hidden-apps = false
+
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+# Possible values: (qwerty|dvorak|colemak)
+# See https://nikitabobko.github.io/AeroSpace/guide#key-mapping
+[key-mapping]
+    preset = 'qwerty'
+
+[gaps]
+    inner.horizontal = 0
+    inner.vertical =   0
+    outer.left =       0
+    outer.bottom =     0
+    outer.top =        0
+    outer.right =      0
+
+[mode.main.binding]
+    alt-h = 'focus --boundaries-action wrap-around-the-workspace left'
+    alt-j = 'focus --boundaries-action wrap-around-the-workspace down'
+    alt-k = 'focus --boundaries-action wrap-around-the-workspace up'
+    alt-l = 'focus --boundaries-action wrap-around-the-workspace right'
+
+    alt-shift-h = 'move left'
+    alt-shift-j = 'move down'
+    alt-shift-k = 'move up'
+    alt-shift-l = 'move right'
+
+    alt-g = 'split horizontal'
+    alt-v = 'split vertical'
+
+    alt-f = 'fullscreen'
+
+    alt-s = 'layout v_accordion' # 'layout stacking'
+    alt-w = 'layout h_accordion' # 'layout tabbed' / window
+    alt-e = 'layout tiles horizontal vertical' # 'layout toggle split'
+
+    alt-shift-space = 'layout floating tiling' # 'floating toggle'
+    
+    alt-1 = 'workspace 1'
+    alt-2 = 'workspace 2'
+    alt-3 = 'workspace 3'
+    alt-4 = 'workspace 4'
+    alt-5 = 'workspace 5'
+    alt-6 = 'workspace 6'
+    alt-7 = 'workspace 7'
+    alt-8 = 'workspace 8'
+    alt-9 = 'workspace 9'
+
+    alt-shift-1 = 'move-node-to-workspace 1'
+    alt-shift-2 = 'move-node-to-workspace 2'
+    alt-shift-3 = 'move-node-to-workspace 3'
+    alt-shift-4 = 'move-node-to-workspace 4'
+    alt-shift-5 = 'move-node-to-workspace 5'
+    alt-shift-6 = 'move-node-to-workspace 6'
+    alt-shift-7 = 'move-node-to-workspace 7'
+    alt-shift-8 = 'move-node-to-workspace 8'
+    alt-shift-9 = 'move-node-to-workspace 9'
+
+    alt-shift-c = 'reload-config'
+
+    alt-r = 'mode resize'
+
+    alt-tab = 'workspace-back-and-forth'
+    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+[mode.resize.binding]
+    h = 'resize width -50'
+    j = 'resize height +50'
+    k = 'resize height -50'
+    l = 'resize width +50'
+    enter = 'mode main'
+    esc = 'mode main'

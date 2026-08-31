@@ -1,0 +1,77 @@
+# Bootstrap and maintenance tasks for this dotfiles repo.
+#
+# The actual tool list lives in dot-config/mise/config.toml, which is linked to
+# ~/.config/mise/config.toml so neovim, herdr and friends resolve from every
+# directory rather than only from inside this checkout.
+#
+#   mise run bootstrap     first-time setup on a new machine
+#   mise run link          re-link configs after pulling
+#   mise run doctor        check that the integration is wired up
+
+# {{config_root}} in task definitions needs a reasonably recent mise.
+min_version = "2024.11.0"
+
+[env]
+# Every task resolves paths against the checkout, not the caller's cwd.
+DOTFILES = "{{config_root}}"
+
+# --- bootstrap -------------------------------------------------------------
+
+[tasks.bootstrap]
+description = "Full first-time setup: homebrew, links, tools, plugins, agents"
+depends = ["brew", "link"]
+# `tools` must follow `link`, since it reads the linked global mise config.
+run = [
+  "mise run tools",
+  "mise run nvim-sync",
+  "mise run herdr-setup",
+  "mise run launchagent",
+  "mise run doctor",
+]
+
+[tasks.brew]
+description = "Install Homebrew if missing, then apply the Brewfile"
+run = "{{config_root}}/scripts/install-brew"
+
+[tasks.link]
+description = "Symlink configs into $HOME"
+run = "{{config_root}}/scripts/link"
+
+[tasks.unlink]
+description = "Remove the symlinks link created"
+run = "{{config_root}}/scripts/link --unlink"
+
+[tasks.tools]
+description = "Install the tools named in ~/.config/mise/config.toml"
+# -y so a fresh machine does not stop on the trust prompt for the linked config.
+run = "mise install -y && mise reshim"
+
+[tasks.nvim-sync]
+description = "Install/update Neovim plugins and treesitter parsers headlessly"
+run = "{{config_root}}/scripts/nvim-sync"
+
+[tasks.herdr-setup]
+description = "Install herdr's agent integrations for the agents we use"
+run = "{{config_root}}/scripts/herdr-setup"
+
+[tasks.launchagent]
+description = "Install and load the herdr sidebar-numbers launch agent (macOS)"
+run = "{{config_root}}/scripts/install-launchagent"
+
+[tasks.doctor]
+description = "Check that neovim, herdr and the integration scripts agree"
+run = "{{config_root}}/scripts/doctor"
+
+# --- maintenance -----------------------------------------------------------
+
+[tasks.update]
+description = "Update tools and Neovim plugins to their pinned latest"
+run = [
+  "mise upgrade -y",
+  "mise run nvim-sync",
+  "mise run herdr-setup",
+]
+
+[tasks.check]
+description = "Lint the shell scripts and load the Neovim config headlessly"
+run = "{{config_root}}/scripts/check"

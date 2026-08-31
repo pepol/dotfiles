@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Install/update Neovim plugins and treesitter parsers without opening a UI.
+set -euo pipefail
+
+command -v nvim >/dev/null 2>&1 || {
+	echo "nvim-sync: nvim is not installed (mise run tools installs it)" >&2
+	exit 1
+}
+
+echo "nvim-sync: $(nvim --version | head -1)"
+
+# lazy.nvim bootstraps itself on first start, so a bare sync is enough. `Lazy!`
+# (with bang) runs synchronously, which is what makes this usable headlessly.
+nvim --headless "+Lazy! sync" +qa
+
+# TSUpdateSync blocks until every parser in ensure_installed is compiled;
+# plain TSUpdate would return before the jobs finish and the +qa would kill them.
+nvim --headless "+TSUpdateSync" +qa
+
+echo "nvim-sync: plugins and parsers are up to date"
