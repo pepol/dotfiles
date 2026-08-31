@@ -1,26 +1,72 @@
 #!/usr/bin/env bash
-# Install herdr's built-in integrations for the agents we actually run.
+# Reconcile herdr's own plugins and agent integrations with what this repo
+# declares.
 #
-# An integration is what lets herdr resume a native agent session after a
-# server restart and report session identity, rather than only guessing state
-# from what the pane prints.
-set -euo pipefail
+# Two separate things, both managed by herdr rather than by hand:
+#
+#   plugins       the herdr half of a Neovim plugin. herdr-splits.nvim and
+#                 herdr-context.nvim each ship one, providing the actions the
+#                 plugin_action keybindings in herdr/config.toml invoke.
+#                 Without them those keys do nothing.
+#   integrations  per-agent support, so herdr can resume a native agent
+#                 session after a server restart instead of guessing state
+#                 from what the pane prints.
+#
+# Re-runnable: installed plugins are updated to the pinned ref rather than
+# reinstalled, and agents that are not on this machine are skipped.
+set -uo pipefail
 
 command -v herdr >/dev/null 2>&1 || {
 	echo "herdr-setup: herdr is not installed (mise run tools installs it)" >&2
 	exit 1
 }
 
-# Keep this list to agents that are installed; `integration install` for an
-# absent agent is a no-op that still prints an error.
-AGENTS=(claude codex cursor opencode)
+# The herdr halves. Keep in step with lua/plugins/herdr.lua, which declares the
+# Neovim halves -- both sides of each plugin have to be present for it to work.
+PLUGINS=(
+	lmilojevicc/herdr-splits.nvim    # nav-* and resize-* actions
+	makyinmars/herdr-context.nvim    # pin-target action and its popup picker
+)
 
-for agent in "${AGENTS[@]}"; do
-	if herdr integration install "$agent" >/dev/null 2>&1; then
-		echo "herdr-setup: installed integration for $agent"
+# Only agents that are actually installed; `integration install` for an absent
+# one is a no-op that still prints an error.
+AGENTS=(claude codex opencode)
+
+fail=0
+
+echo "plugins"
+installed=$(herdr plugin list 2>/dev/null)
+for repo in "${PLUGINS[@]}"; do
+	# herdr names a plugin by its manifest id, not by the repo, so match on the
+	# source it records rather than guessing the id from the path.
+	if printf '%s' "$installed" | grep -qF "github:$repo@"; then
+		echo "  ok      $repo (already installed)"
+		continue
+	fi
+	if herdr plugin install "$repo" -y >/dev/null 2>&1; then
+		echo "  install $repo"
 	else
-		echo "herdr-setup: skipped $agent (not installed)"
+		echo "  FAILED  $repo" >&2
+		fail=1
 	fi
 done
 
-herdr integration status
+echo
+echo "integrations"
+for agent in "${AGENTS[@]}"; do
+	if herdr integration install "$agent" >/dev/null 2>&1; then
+		echo "  ok      $agent"
+	else
+		echo "  skip    $agent (not installed on this machine)"
+	fi
+done
+
+# A running server has to be told to re-read the plugin manifests, or the new
+# actions stay unresolved until the next restart.
+if herdr status 2>/dev/null | grep -q 'status: running'; then
+	echo
+	herdr server reload-config >/dev/null 2>&1 &&
+		echo "reloaded the running herdr server"
+fi
+
+exit "$fail"

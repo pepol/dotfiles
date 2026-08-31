@@ -27,7 +27,7 @@ Individual steps, all re-runnable:
 | `mise run link` | re-link configs after a pull |
 | `mise run tools` | install/update the tools in the global mise config |
 | `mise run nvim-sync` | plugins and treesitter parsers, headless |
-| `mise run herdr-setup` | herdr's per-agent integrations |
+| `mise run herdr-setup` | herdr-side plugins and per-agent integrations |
 | `mise run doctor` | check the pieces can see each other |
 | `mise run check` | lint scripts, load the Neovim config in a scratch $HOME |
 | `mise run link -- --dry-run` | show what linking would change |
@@ -54,6 +54,11 @@ of things already belonging to one side or the other:
 - `prefix+e` pulls a pane's scrollback into Neovim as an ordinary buffer,
   which is then stageable into an agent prompt like anything else.
 - `prefix+shift+g` puts a branch in its own worktree and its own workspace.
+
+herdr-context's pickers — choosing the target agent, the agent drawer — go
+through `vim.ui.select`, which `telescope-ui-select` serves, so they appear as
+telescope pickers alongside `<leader>ff` and the rest. There is no separate
+herdr telescope extension to install.
 
 In a commit message or rebase todo, `<leader>w` saves and hands control back,
 and `<leader>q` exits non-zero so git cancels.
@@ -183,8 +188,17 @@ installing Homebrew already pulls in. `mise run doctor` checks that the
 library actually built, since telescope silently falls back to the slower Lua
 sorter without it.
 
-`mise run herdr-setup` installs the agent integrations; the herdr halves of
-these two plugins are installed with `herdr plugin install <repo>`.
+Both halves are declared, not installed by hand. The Neovim halves are lazy.nvim
+specs in `nvim/lua/plugins/herdr.lua`; the herdr halves are the `PLUGINS` list
+at the top of `scripts/herdr-setup`, which `mise run herdr-setup` reconciles
+through herdr's own plugin manager (`herdr plugin`) along with the per-agent
+integrations. Keep the two lists in step — a plugin with only one half
+installed silently does nothing.
+
+`mise run doctor` checks that every `plugin_action` keybinding in
+`herdr/config.toml` resolves to an action a registered plugin actually
+provides, which is the failure mode you would otherwise only notice by
+pressing the key.
 
 Taking `ctrl+h` for navigation also takes ASCII backspace. The Backspace key
 sends DEL and is unaffected; only the literal `ctrl+h` chord is gone.

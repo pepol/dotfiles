@@ -69,17 +69,36 @@ echo
 echo "herdr"
 if [ "${HERDR_ENV:-}" = 1 ]; then
 	ok "running inside a herdr pane (workspace ${HERDR_WORKSPACE_ID:-?})"
-	if herdr plugin list 2>/dev/null | grep -q herdr-splits; then
-		ok "herdr-splits herdr plugin installed"
-	else
-		bad "herdr-splits herdr plugin missing; ctrl+hjkl will not cross panes"
-		note "fix: herdr plugin install lmilojevicc/herdr-splits.nvim"
-	fi
-	if herdr plugin list 2>/dev/null | grep -q herdr-context; then
-		ok "herdr-context herdr plugin installed"
-	else
-		note "herdr-context herdr plugin missing (only its target picker needs it)"
-	fi
+	# The herdr half of each Neovim plugin. Without it the plugin_action
+	# keybindings in herdr/config.toml resolve to nothing.
+	for plugin in herdr-splits herdr-context; do
+		if herdr plugin list 2>/dev/null | grep -q "^- $plugin "; then
+			ok "$plugin herdr plugin installed"
+		else
+			bad "$plugin herdr plugin missing (mise run herdr-setup)"
+		fi
+	done
+	# Every plugin_action the config binds has to resolve to a registered
+	# action, or that key silently does nothing.
+	actions=$(herdr plugin action list 2>/dev/null |
+		sed 's/[{,]/\n/g' | sed -n 's/.*"action_id":"\([^"]*\)".*/\1/p')
+	plugin_ids=$(herdr plugin action list 2>/dev/null |
+		sed 's/[{,]/\n/g' | sed -n 's/.*"plugin_id":"\([^"]*\)".*/\1/p')
+	missing=0
+	while IFS= read -r bound; do
+		[ -n "$bound" ] || continue
+		want_plugin=${bound%%.*}
+		want_action=${bound#*.}
+		if ! printf '%s\n' "$actions" | grep -qx "$want_action" ||
+		   ! printf '%s\n' "$plugin_ids" | grep -qx "$want_plugin"; then
+			bad "keybinding refers to unknown action $bound"
+			missing=1
+		fi
+	done <<-BOUND
+		$(sed -n 's/^command = "\([a-z-]*\.[a-z-]*\)"$/\1/p' \
+			"${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml" 2>/dev/null)
+	BOUND
+	[ "$missing" -eq 0 ] && ok "every plugin_action keybinding resolves"
 else
 	note "not inside a herdr pane; skipping the herdr plugin checks"
 fi

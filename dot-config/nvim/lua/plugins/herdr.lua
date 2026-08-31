@@ -1,8 +1,10 @@
 -- The herdr side of the editor.
 --
 -- Both plugins install in two halves: a herdr plugin providing the actions
--- herdr keybindings invoke, and this Neovim half. `mise run herdr-setup`
--- installs the herdr halves; these specs are the Neovim halves.
+-- herdr keybindings invoke, and this Neovim half. These specs are the Neovim
+-- halves; the herdr halves are the PLUGINS list in scripts/herdr-setup, which
+-- `mise run herdr-setup` reconciles. Adding a plugin here means adding it
+-- there too -- one half alone does nothing.
 --
 -- Everything here is gated on HERDR_ENV so a Neovim started outside a herdr
 -- pane (over ssh, from a plain terminal) loads none of it.
