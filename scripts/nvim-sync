@@ -15,6 +15,16 @@ nvim --headless "+Lazy! sync" +qa
 
 # TSUpdateSync blocks until every parser in ensure_installed is compiled;
 # plain TSUpdate would return before the jobs finish and the +qa would kill them.
-nvim --headless "+TSUpdateSync" +qa
+#
+# Parsers arrive as source tarballs from a repository's /archive/ endpoint. On
+# a network that blocks that but allows git (some corporate proxies, and
+# Claude Code's own sandbox), set NVIM_TS_PREFER_GIT=1 to clone them instead.
+if [ "${NVIM_TS_PREFER_GIT:-0}" = 1 ]; then
+	nvim --headless \
+		-c 'lua require("nvim-treesitter.install").prefer_git = true' \
+		"+TSUpdateSync" +qa
+else
+	nvim --headless "+TSUpdateSync" +qa
+fi
 
 echo "nvim-sync: plugins and parsers are up to date"

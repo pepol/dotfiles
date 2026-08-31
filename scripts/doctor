@@ -79,26 +79,36 @@ if [ "${HERDR_ENV:-}" = 1 ]; then
 		fi
 	done
 	# Every plugin_action the config binds has to resolve to a registered
-	# action, or that key silently does nothing.
-	actions=$(herdr plugin action list 2>/dev/null |
-		sed 's/[{,]/\n/g' | sed -n 's/.*"action_id":"\([^"]*\)".*/\1/p')
-	plugin_ids=$(herdr plugin action list 2>/dev/null |
-		sed 's/[{,]/\n/g' | sed -n 's/.*"plugin_id":"\([^"]*\)".*/\1/p')
-	missing=0
-	while IFS= read -r bound; do
-		[ -n "$bound" ] || continue
-		want_plugin=${bound%%.*}
-		want_action=${bound#*.}
-		if ! printf '%s\n' "$actions" | grep -qx "$want_action" ||
-		   ! printf '%s\n' "$plugin_ids" | grep -qx "$want_plugin"; then
-			bad "keybinding refers to unknown action $bound"
-			missing=1
+	# action, or that key silently does nothing. Only meaningful against a
+	# running server: with none, the action list comes back empty and every
+	# binding would look broken.
+	if ! herdr status 2>/dev/null | grep -q 'status: running'; then
+		note "herdr server not running; skipping the keybinding check"
+	else
+		actions=$(herdr plugin action list 2>/dev/null |
+			sed 's/[{,]/\n/g' | sed -n 's/.*"action_id":"\([^"]*\)".*/\1/p')
+		plugin_ids=$(herdr plugin action list 2>/dev/null |
+			sed 's/[{,]/\n/g' | sed -n 's/.*"plugin_id":"\([^"]*\)".*/\1/p')
+		if [ -z "$actions" ]; then
+			bad "herdr reported no plugin actions at all"
+		else
+			missing=0
+			while IFS= read -r bound; do
+				[ -n "$bound" ] || continue
+				want_plugin=${bound%%.*}
+				want_action=${bound#*.}
+				if ! printf '%s\n' "$actions" | grep -qx "$want_action" ||
+				   ! printf '%s\n' "$plugin_ids" | grep -qx "$want_plugin"; then
+					bad "keybinding refers to unknown action $bound"
+					missing=1
+				fi
+			done <<-BOUND
+				$(sed -n 's/^command = "\([a-z-]*\.[a-z-]*\)"$/\1/p' \
+					"${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml" 2>/dev/null)
+			BOUND
+			[ "$missing" -eq 0 ] && ok "every plugin_action keybinding resolves"
 		fi
-	done <<-BOUND
-		$(sed -n 's/^command = "\([a-z-]*\.[a-z-]*\)"$/\1/p' \
-			"${XDG_CONFIG_HOME:-$HOME/.config}/herdr/config.toml" 2>/dev/null)
-	BOUND
-	[ "$missing" -eq 0 ] && ok "every plugin_action keybinding resolves"
+	fi
 else
 	note "not inside a herdr pane; skipping the herdr plugin checks"
 fi
