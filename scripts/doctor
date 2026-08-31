@@ -25,6 +25,11 @@ fi
 
 echo
 echo "environment"
+# Telescope shells out to these: ripgrep is required for live_grep, fd is the
+# preferred file finder. Both come from the global mise config.
+for tool in rg fd; do
+	if have "$tool"; then ok "$tool"; else bad "$tool not on PATH (mise run tools)"; fi
+done
 for script in herdr-sidebar-numbers tf-file; do
 	if have "$script"; then ok "$script"; else bad "$script not on PATH (mise run link)"; fi
 done
@@ -49,6 +54,15 @@ if have nvim; then
 			bad "$plugin not installed (mise run nvim-sync, inside a herdr pane)"
 		fi
 	done
+	# The one plugin with a compile step, so the one that can be installed
+	# but not working. Without it telescope falls back to the Lua sorter.
+	fzf_native="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/telescope-fzf-native.nvim/build"
+	if [ -f "$fzf_native/libfzf.so" ] || [ -f "$fzf_native/libfzf.dylib" ]; then
+		ok "telescope-fzf-native built"
+	else
+		bad "telescope-fzf-native not built (nvim -c 'Lazy build telescope-fzf-native.nvim')"
+		note "needs make and a C compiler: xcode-select --install"
+	fi
 fi
 
 echo

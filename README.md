@@ -177,6 +177,12 @@ providing the actions herdr keybindings invoke, and a Neovim plugin:
   writing prompts in a buffer and staging code context into a live agent's
   prompt without submitting it.
 
+`telescope-fzf-native.nvim` is the other plugin with a compile step. It needs
+`make` and a C compiler — on macOS the Xcode command line tools, which
+installing Homebrew already pulls in. `mise run doctor` checks that the
+library actually built, since telescope silently falls back to the slower Lua
+sorter without it.
+
 `mise run herdr-setup` installs the agent integrations; the herdr halves of
 these two plugins are installed with `herdr plugin install <repo>`.
 
