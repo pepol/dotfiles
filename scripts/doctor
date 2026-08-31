@@ -24,19 +24,14 @@ if have nvim; then
 fi
 
 echo
-echo "editor routing"
-for script in herdr-nvim nv herdr-project herdr-sidebar-numbers; do
+echo "environment"
+for script in herdr-sidebar-numbers tf-file; do
 	if have "$script"; then ok "$script"; else bad "$script not on PATH (mise run link)"; fi
 done
-if [ -r "$HOME/.local/lib/herdr/herdr_ipc.py" ]; then
-	ok "herdr_ipc.py"
-else
-	bad "~/.local/lib/herdr/herdr_ipc.py missing (mise run link)"
-fi
 case "${EDITOR:-}" in
-	*herdr-nvim) ok "\$EDITOR is $EDITOR" ;;
+	*nvim) ok "\$EDITOR is $EDITOR" ;;
 	"") bad "\$EDITOR is unset; open a new shell so .zshrc applies" ;;
-	*) bad "\$EDITOR is $EDITOR, expected herdr-nvim" ;;
+	*) bad "\$EDITOR is $EDITOR, expected nvim" ;;
 esac
 
 echo

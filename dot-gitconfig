@@ -7,9 +7,7 @@
 
 [core]
   pager = delta
-  # herdr-nvim, so `git commit` from any pane opens a tab in the Neovim that
-  # owns the workspace and blocks until it is closed.
-  editor = herdr-nvim
+  editor = nvim
   whitespace = trailing-space,space-before-tab,tab-in-indent
 
 [interactive]
@@ -23,12 +21,9 @@
 # --- diff and merge ---------------------------------------------------------
 # Reading a change is Neovim's job. Two routes, deliberately:
 #
-#   git difftool / mergetool  -> nvim in this pane, for a one-off file
-#   :DiffviewOpen             -> in the workspace editor, for a whole change
-#
-# difftool starts its own nvim rather than routing through herdr-nvim because
-# it needs -d, and Neovim's remote protocol cannot open a diff in a running
-# instance.
+#   git difftool / mergetool  -> nvim -d in this pane, for a one-off file
+#   :DiffviewOpen             -> inside an editor you already have open, for
+#                                a whole change
 [diff]
   mnemonicPrefix = true
   algorithm = histogram

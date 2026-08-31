@@ -15,9 +15,8 @@ Do not ask for confirmation of the message; generate it and commit. If there
 is nothing to commit, say so and do nothing.
 
 Use `git commit -m "<message>"`. Do **not** run a bare `git commit`: `$EDITOR`
-is `herdr-nvim`, so it would open a buffer in the user's editor and block
-until they close it. Only do that if the user explicitly asked to write the
-message themselves.
+is `nvim`, so it would take over your pane with a full-screen editor and block
+until something closes it.
 
 ## Preferred: Git MCP server
 

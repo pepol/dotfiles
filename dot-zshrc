@@ -15,11 +15,7 @@ source $ZSH/oh-my-zsh.sh
 export LANG=en_US.UTF-8
 
 # --- editor -----------------------------------------------------------------
-# herdr-nvim, not nvim. Inside a herdr pane it hands the file to the Neovim
-# that already owns this workspace and blocks until you close the tab, so a
-# commit message opens in the editor on screen rather than starting a second
-# one in the shell pane. Outside herdr it is plain nvim.
-export EDITOR="herdr-nvim"
+export EDITOR="nvim"
 export VISUAL="$EDITOR"
 export GIT_EDITOR="$EDITOR"
 
@@ -46,12 +42,6 @@ export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export KUBECONFIG=~/.kube/eks-config:~/.kube/config
 
 # --- herdr ------------------------------------------------------------------
-# A short name for the router, so `nv file` from any pane lands in the
-# workspace editor.
-alias nv="herdr-nvim"
-# Open a branch as a worktree-backed workspace laid out editor + agent.
-alias hp="herdr-project"
-
 # Show which herdr workspace a shell belongs to. Panes are per-project, and
 # the prompt is the only place that is visible once the sidebar is collapsed.
 herdr_prompt() {

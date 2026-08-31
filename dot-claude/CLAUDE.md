@@ -1,8 +1,8 @@
 # Working in this environment
 
 You are running in a pane of a **herdr** session. herdr is the terminal
-multiplexer and agent orchestrator; **Neovim** is the editor for everything
-textual. Confirm the environment before using any of this:
+multiplexer and agent orchestrator; **Neovim** is the editor. Confirm the
+environment before using any of this:
 
 ```bash
 test "${HERDR_ENV:-}" = 1
@@ -11,29 +11,21 @@ test "${HERDR_ENV:-}" = 1
 Your own coordinates are in `$HERDR_WORKSPACE_ID`, `$HERDR_TAB_ID` and
 `$HERDR_PANE_ID`.
 
-## Opening files for the user
+## Editing and reading files
 
-Do not print a file and ask the user to open it themselves, and do not start
-your own `nvim`. Run:
+Read and edit files directly. Do not start an editor to do it: `$EDITOR` is
+`nvim`, and running it in your pane takes over that pane with a full-screen UI
+you then have to drive blind.
 
-```bash
-nv path/to/file          # or: herdr-nvim path/to/file
-```
-
-This hands the file to the Neovim that already owns this workspace, brings
-that pane into focus, and blocks until the user closes the tab. It is the
-same mechanism `$EDITOR` uses, so `git commit` behaves the same way: the
-message opens in the editor the user is looking at, and the command you ran
-resumes when they close it.
-
-Because it blocks, only use it when you actually want the user to look at
-something now. To read a file yourself, read it directly.
+The user has their own Neovim, in its own pane. When they should look at
+something, name the file and line and let them open it — do not try to open it
+for them.
 
 ## Layout conventions
 
-A workspace is one project checkout. The usual layout is Neovim on the left
-and an agent on the right; `herdr-project <branch>` creates that from a git
-worktree.
+A workspace is one project checkout. The usual layout is Neovim in one pane
+and an agent in another; `prefix+shift+g` makes a new worktree-backed
+workspace for a branch.
 
 When you need to run something alongside your own pane, split rather than
 taking over the user's editor:
@@ -47,8 +39,10 @@ Prefer `--no-focus` so the user keeps their place.
 
 ## Git
 
-- `git commit` opens Neovim for the user; write the message with `-m` unless
-  the user asked to edit it.
+- Always `git commit -m`. A bare `git commit` opens `nvim` in your pane and
+  blocks until something closes it, which you cannot do.
+- Same for `git rebase -i`, `git add -p` and anything else interactive:
+  use the non-interactive form.
 - Reviewing a change is the user's editor's job, not a wall of terminal
   output: point them at `<leader>gr` (diffview over the branch) rather than
   pasting a long diff.

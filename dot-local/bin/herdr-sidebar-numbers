@@ -12,13 +12,12 @@ Only 1..9 are reported, since higher positions have no keybinding.
 Usage: herdr-sidebar-numbers --once | --watch
 """
 
+import json
 import os
+import socket
 import sys
 import threading
 import time
-
-sys.path.insert(0, os.path.expanduser("~/.local/lib/herdr"))
-import herdr_ipc  # noqa: E402
 
 SOURCE = "sidebar-numbers"
 MAX = 9
@@ -37,95 +36,95 @@ EVENTS = [
 ]
 
 
+def socket_path():
+    """Resolve the server socket the way the herdr CLI does."""
+    if os.environ.get("HERDR_SOCKET_PATH"):
+        return os.environ["HERDR_SOCKET_PATH"]
+    config = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    session = os.environ.get("HERDR_SESSION")
+    if session:
+        return os.path.join(config, "herdr", "sessions", session, "herdr.sock")
+    return os.path.join(config, "herdr", "herdr.sock")
+
+
+def request(method, params):
+    """Send one request. The server serves a single request per connection."""
+    with socket.socket(socket.AF_UNIX) as s:
+        s.settimeout(10)
+        s.connect(socket_path())
+        with s.makefile("rwb") as f:
+            f.write((json.dumps({"id": "sidebar-numbers", "method": method,
+                                 "params": params}) + "\n").encode())
+            f.flush()
+            line = f.readline()
+    if not line:
+        raise OSError(f"no response to {method}")
+    reply = json.loads(line.decode())
+    if "error" in reply:
+        raise OSError(f"{method}: {reply['error'].get('message', reply['error'])}")
+    return reply["result"]
+
+
 def number_token(index):
     """Positions past the last keybinding get no number rather than a lie."""
     return str(index) if 1 <= index <= MAX else None
 
 
 def renumber():
-    for space in herdr_ipc.request("workspace.list")["workspaces"]:
-        herdr_ipc.request(
-            "workspace.report_metadata",
-            {
-                "workspace_id": space["workspace_id"],
-                "source": SOURCE,
-                "tokens": {"n": number_token(space["number"])},
-            },
-            client_id=SOURCE,
-        )
+    for space in request("workspace.list", {})["workspaces"]:
+        request("workspace.report_metadata", {
+            "workspace_id": space["workspace_id"],
+            "source": SOURCE,
+            "tokens": {"n": number_token(space["number"])},
+        })
 
     # Agent panel order under the default agent_panel_sort = "spaces": grouped
     # by workspace, then tab, then pane -- the order agent.list already returns.
-    for index, agent in enumerate(herdr_ipc.request("agent.list")["agents"], start=1):
-        herdr_ipc.request(
-            "pane.report_metadata",
-            {
-                "pane_id": agent["pane_id"],
-                "source": SOURCE,
-                "tokens": {"n": number_token(index)},
-            },
-            client_id=SOURCE,
-        )
+    for index, agent in enumerate(request("agent.list", {})["agents"], start=1):
+        request("pane.report_metadata", {
+            "pane_id": agent["pane_id"],
+            "source": SOURCE,
+            "tokens": {"n": number_token(index)},
+        })
 
 
 def watch():
-    """Renumber on topology changes, coalescing bursts into one pass.
-
-    The event stream needs a connection held open, which is the one thing the
-    shared single-request client does not do, so this speaks the protocol
-    directly.
-    """
-    import json
-    import socket
-
-    pending = threading.Event()
-
-    def apply_loop():
-        while True:
-            pending.wait()
-            # Let a burst (a workspace closing takes its panes with it) settle
-            # into one renumber rather than one per event.
-            time.sleep(0.2)
-            pending.clear()
-            try:
-                renumber()
-            except (herdr_ipc.HerdrError, OSError) as err:
-                print("renumber failed: %s" % err, file=sys.stderr)
-
-    threading.Thread(target=apply_loop, daemon=True).start()
-
+    """Renumber on topology changes, coalescing bursts into one pass."""
     while True:
         try:
-            with socket.socket(socket.AF_UNIX) as sock:
-                sock.connect(herdr_ipc.socket_path())
-                with sock.makefile("rwb") as stream:
-                    stream.write(
-                        (
-                            json.dumps(
-                                {
-                                    "id": SOURCE,
-                                    "method": "events.subscribe",
-                                    "params": {
-                                        "subscriptions": [
-                                            {"type": event} for event in EVENTS
-                                        ]
-                                    },
-                                }
-                            )
-                            + "\n"
-                        ).encode()
-                    )
-                    stream.flush()
-                    stream.readline()  # subscription_started
+            with socket.socket(socket.AF_UNIX) as s:
+                s.connect(socket_path())
+                with s.makefile("rwb") as f:
+                    f.write((json.dumps({
+                        "id": "sidebar-numbers",
+                        "method": "events.subscribe",
+                        "params": {"subscriptions": [{"type": e} for e in EVENTS]},
+                    }) + "\n").encode())
+                    f.flush()
+                    f.readline()  # subscription_started
 
                     # Subscribing replays a backlog of past events; renumber
                     # once from live state instead of acting on each replay.
                     renumber()
 
-                    for _ in stream:
+                    pending = threading.Event()
+
+                    def apply():
+                        while True:
+                            pending.wait()
+                            time.sleep(0.2)
+                            pending.clear()
+                            try:
+                                renumber()
+                            except OSError as err:
+                                print(f"renumber failed: {err}", file=sys.stderr)
+
+                    threading.Thread(target=apply, daemon=True).start()
+
+                    for _ in f:
                         pending.set()
-        except (OSError, ValueError, KeyError, herdr_ipc.HerdrError) as err:
-            print("reconnecting after: %s" % err, file=sys.stderr)
+        except (OSError, ValueError, KeyError) as err:
+            print(f"reconnecting after: {err}", file=sys.stderr)
         time.sleep(2)
 
 
@@ -136,7 +135,7 @@ def main():
     elif mode == "--watch":
         watch()
     else:
-        print("usage: herdr-sidebar-numbers --once | --watch", file=sys.stderr)
+        print(__doc__.strip().splitlines()[-1], file=sys.stderr)
         return 2
     return 0
 

@@ -36,34 +36,28 @@ Individual steps, all re-runnable:
 
 ## How the two halves fit together
 
-A **herdr workspace is one project checkout**, and it holds exactly one
-Neovim. That Neovim listens on a socket named after the workspace, under
-`$XDG_RUNTIME_DIR/herdr-nvim` (or `$TMPDIR/herdr-nvim-$UID` on macOS).
+A **herdr workspace is one project checkout**, usually with Neovim in one pane
+and an agent in another. `$EDITOR` is plain `nvim`: `git commit` in a shell
+pane, `git rebase -i`, and herdr's `prefix+e` scrollback edit each start
+Neovim right there, in the pane that asked for it, and the caller resumes when
+it exits.
 
-`$EDITOR` is not `nvim`, it is **`herdr-nvim`**. Whatever asks for an editor —
-`git commit` in a shell pane, `git rebase -i`, an agent opening a file,
-herdr's own `prefix+e` scrollback edit — goes through it:
+There is no editor-routing layer between the two. What joins them is a handful
+of things already belonging to one side or the other:
 
-1. Already inside a Neovim `:terminal`? Use that instance.
-2. Is there a live editor for this workspace? Focus its pane, open the file
-   there as a tab, block until you close it, then return focus to the pane
-   that asked.
-3. Otherwise, become the workspace editor: start Neovim listening on the
-   socket, so the next call takes branch 2.
+- `ctrl+hjkl` and `ctrl+alt+hjkl` cross the editor/pane boundary, so moving
+  and resizing does not care which side of it you are on
+  ([herdr-splits.nvim](https://github.com/lmilojevicc/herdr-splits.nvim)).
+- Prompts are written in a Neovim buffer, with code, diagnostics, git hunks or
+  the quickfix list staged into a live agent's prompt
+  ([herdr-context.nvim](https://github.com/makyinmars/herdr-context.nvim)).
+- `prefix+e` pulls a pane's scrollback into Neovim as an ordinary buffer,
+  which is then stageable into an agent prompt like anything else.
+- `prefix+shift+g` puts a branch in its own worktree and its own workspace.
 
-Outside herdr it is plain `nvim`. So is any invocation carrying Neovim options
-(`nv -d a b`, `nv +42 file`), which describe how one editor process should
-start and cannot be honoured by a remote tab.
+In a commit message or rebase todo, `<leader>w` saves and hands control back,
+and `<leader>q` exits non-zero so git cancels.
 
-Neovim implements none of Vim's `--remote-wait` variants — it answers `E5600`
-— so `herdr-nvim` does the waiting itself: it opens the file with
-`--remote-tab`, then polls until the file is no longer displayed in any
-window. "No longer on screen" rather than "buffer gone", because `:wq` leaves
-the buffer listed but hidden, and git only needs you to be finished with it.
-
-`nv` is a short alias for the same thing, and is what the agent rules in
-`dot-claude/` and `dot-cursor/` tell agents to use instead of starting their
-own editor.
 
 ## Keys
 
@@ -92,26 +86,23 @@ the focused pane holds Neovim or a shell:
 | `<leader>at` / `<leader>aa` | choose the target agent / toggle the agent drawer |
 | `<leader>ff` `<leader>fg` `<leader>fb` | files, grep, buffers |
 
-In a commit message, rebase todo or other buffer opened as `$EDITOR`,
-`<leader>w` saves and hands control back and `<leader>q` aborts.
-
 ## Starting a project
 
+`prefix+shift+g` prompts for a branch and gives it a git worktree in its own
+herdr workspace. From a shell:
+
 ```bash
-herdr-project <branch> [--kind claude] [--base main]
+herdr worktree create --branch <branch> --label <branch> --focus
 ```
 
-Creates a git worktree for the branch, a herdr workspace labelled after it,
-Neovim on the left (claiming the workspace editor socket) and an agent on the
-right. `hp` is the alias.
+`prefix+shift+o` opens an existing one. Clean up with `herdr worktree remove`,
+which closes the workspace too.
 
-Worktrees land in `.worktrees/<repo>/<branch>` **beside the repository**, not
-under a single global worktree root. That is deliberate: the `includeIf
-gitdir:` rules in `.gitconfig` pick the git identity by path, so a worktree of
-a repo in `~/src/corp` has to stay under `~/src/corp` to keep the corp name
-and email.
-
-Clean up with `herdr worktree remove <path>`, which closes the workspace too.
+One thing to watch: `.gitconfig` picks the git identity by path
+(`includeIf gitdir:~/src/corp/`), and herdr checks worktrees out under
+`~/.herdr/worktrees` by default, where none of those rules match. Either pass
+`--path` to keep a checkout under the tree it came from, or set
+`[worktrees] directory` in `herdr/config.toml` per machine.
 
 ## What is where
 
@@ -123,9 +114,9 @@ templates/                   the launch agent plist, before $HOME is filled in
 dot-config/mise/config.toml  the real tool list -- neovim, herdr, runtimes
 dot-config/nvim/             Neovim 0.12 config
 dot-config/herdr/config.toml herdr keys, sidebar, popups
-dot-local/bin/               herdr-nvim, nv, herdr-project, herdr-sidebar-numbers
-dot-local/lib/herdr/         herdr socket client + editor registry, shared by those
-dot-claude/, dot-cursor/     agent rules: use nv, split rather than take over
+dot-local/bin/               herdr-sidebar-numbers, tf-file
+dot-claude/, dot-cursor/     agent rules: edit files directly, split rather
+                             than take over the user's pane
 ```
 
 ## Linking
@@ -197,5 +188,5 @@ sends DEL and is unaffected; only the literal `ctrl+h` chord is gone.
 tmux and zellij (herdr replaces both), Helix and Emacs and `.vimrc` (Neovim is
 the only editor now), `gh.nvim` and `litee.nvim` (unmaintained, replaced by
 `octo.nvim`), `vim-slime` (targeted tmux; `herdr-context.nvim` covers sending
-text to a pane), and asdf (mise). The old configs are in the
+text to an agent), and asdf (mise). The old configs are in the
 `dotfiles-v2024` repository.

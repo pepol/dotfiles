@@ -18,12 +18,12 @@
 # Terminal multiplexer and agent orchestrator.
 herdr = "0.8"
 
-# Used by the Neovim config and the herdr integration scripts.
+# Used by the Neovim config and the shell.
 ripgrep = "latest"   # telescope live_grep, :grep
 fd = "latest"        # telescope find_files
-fzf = "latest"       # herdr-prompt / herdr-project pickers
+fzf = "latest"       # shell-side fuzzy finding
 jq = "latest"        # shell-side herdr JSON, ad-hoc use
-lazygit = "latest"   # bound to prefix+alt+g as a herdr popup
+lazygit = "latest"   # ad-hoc git TUI; the editor covers review
 delta = "latest"     # git pager
 
 # Language runtimes. Neovim starts the servers these ship; mise resolves them.

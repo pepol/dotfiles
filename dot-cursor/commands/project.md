@@ -1,7 +1,6 @@
 # Project
 
-Start a new project: a git worktree, a herdr workspace, and the standard
-editor-plus-agent layout.
+Start a new project: a git worktree in its own herdr workspace.
 
 ## Input
 
@@ -11,39 +10,39 @@ anything else with `-`; collapse runs of `-` to one.
 
 ## Workflow
 
-This is one command. `herdr-project` does the worktree, the workspace, the
-split and the agent:
+herdr does the whole thing — worktree, checkout and workspace — in one
+command:
 
 ```bash
-herdr-project <branch> --kind cursor
+herdr worktree create --branch <branch> --label <branch> --focus
 ```
 
-That creates:
+Add `--base <ref>` to fork from something other than the repository default,
+and `--path <path>` to place the checkout somewhere specific. Read the new
+workspace and pane ids from `.result`.
 
-- a git worktree for `<branch>`, under `.worktrees/<repo>/<branch>` beside the
-  repository — deliberately not under a global worktree root, so the
-  `includeIf gitdir:` rules in `~/.gitconfig` still pick the right identity;
-- a herdr workspace labelled `<branch>`, focused;
-- a left pane running Neovim through `herdr-nvim`, which claims the
-  workspace's editor socket, so `$EDITOR` from any pane in this workspace
-  lands there;
-- a right pane running the agent.
+Interactively the same thing is `prefix+shift+g`, which prompts for the
+branch.
 
-Add `--base <ref>` to fork from something other than the repository default.
-Omit `--kind` for a plain shell on the right.
+Then set the workspace up for work:
 
-Report the workspace id, the two pane ids and the worktree path back to the
-user. Do not ask for confirmation.
+1. Split a second pane for the agent:
+   `herdr pane split <root-pane> --direction right --cwd <worktree> --no-focus`
+2. Start the agent in it:
+   `herdr agent start <name> --kind cursor --pane <new-pane>`
+
+Leave focus on the first pane. Report the workspace id, both pane ids and the
+worktree path back to the user. Do not ask for confirmation.
 
 ## If it fails
 
-- Not in a git repository → say so; `herdr-project` needs one.
-- Branch already exists → pick another name or check the existing worktree
+- Not in a git repository → say so.
+- Branch already exists → pick another name or look at the existing worktree
   with `git worktree list`; do not delete anything.
 - Agent failed to start → the workspace is still good. Say which agent kind
   failed and leave the pane at a shell.
 
 ## Cleanup
 
-When the work is merged: `herdr worktree remove <path>` (which also closes the
-workspace). Never `rm -rf` a worktree.
+When the work is merged: `herdr worktree remove <path>`, which closes the
+workspace too. Never `rm -rf` a worktree.

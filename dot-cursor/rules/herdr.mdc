@@ -11,14 +11,18 @@ agent orchestrator; Neovim is the editor. Verify with `test "${HERDR_ENV:-}" = 1
 before using any of this; your coordinates are `$HERDR_WORKSPACE_ID`,
 `$HERDR_TAB_ID` and `$HERDR_PANE_ID`.
 
-## Showing the user a file
+## Files
 
-Use `nv <path>` (equivalently `herdr-nvim <path>`). It opens the file in the
-Neovim that owns this workspace, focuses that pane, and blocks until the user
-closes the tab. Never start a bare `nvim` — that creates a second editor in
-your own pane, with none of the user's buffers or LSP clients.
+Read and edit files directly. Never start `nvim` to do it — `$EDITOR` is
+`nvim`, and launching it takes over your pane with a full-screen UI you cannot
+drive. The user has their own Neovim in its own pane; when they should look at
+something, name the file and line.
 
-To read a file for yourself, read it directly rather than opening it.
+## Git
+
+Use `git commit -m`. A bare `git commit` opens Neovim in your pane and blocks
+until something closes it. The same goes for `git rebase -i` and `git add -p`:
+use the non-interactive form.
 
 ## Running shell commands
 
