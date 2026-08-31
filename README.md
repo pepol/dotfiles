@@ -115,7 +115,7 @@ dot-config/mise/config.toml  the real tool list -- neovim, herdr, runtimes
 dot-config/nvim/             Neovim 0.12 config
 dot-config/herdr/config.toml herdr keys, sidebar, popups
 dot-local/bin/               herdr-sidebar-numbers, tf-file
-dot-claude/, dot-cursor/     agent rules: edit files directly, split rather
+dot-claude/                  agent rules: edit files directly, split rather
                              than take over the user's pane
 ```
 
